@@ -1,0 +1,279 @@
+\subsection{Linux}
+
+\begin{frame}{Qu'est-ce que Linux?}
+  \begin{itemize}
+  \item  Linux ne désigne  que le  noyau
+    \note[item]{nous  verrons ce  qu'est le noyau}
+  \item  Linux est  souvent  associé aux  outils  GNU d'où  le nom  de
+    GNU/Linux
+  \item  Systèmes  avec  les  outils  GNU  mais  un  noyau  différent:
+    GNU/Hurd, Solaris, etc...
+  \item Systèmes Linux sans GNU: Android\note[item]{Bionic}
+  \item Le nombre de systèmes  Linux installés est difficile à évaluer
+    (en partie car des système Linux embarqués)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Composants de Linux}
+  GNU/Linux est finalement un aggloméra:
+  \\[2ex]
+  \begin{center}
+    \begin{tikzpicture}
+      \filldraw[cbrown]
+       (-0.05,0.95) -- +(9,0) -- +(9,1) -- +(8,1) -- +(8,2) -- +(7,2) -- +(7,3) 
+       -- +(6,3) -- +(6,4) -- +(2,4) -- +(2,3) -- +(1,3) -- +(1,1) -- +(+0,1) -- cycle;
+% node {Posix};
+     \filldraw[ccyan]
+       (7,5) -- +(1,0) -- +(1,-1) -- +(1.9,-1) -- +(1.9,0.9) -- +(0,0.9) -- cycle +(1,.5) node {App};
+     \filldraw[ccyan]
+       (1,5) rectangle +(1.9,0.9) +(1,.5) node {App};
+     \filldraw[ccyan]
+       (6,4) rectangle +(1.9,0.9) +(1,.5) node {App};
+     \filldraw[cyellow]
+       (4,4) rectangle +(1.9,0.9) +(1,.5) node {GNU App};
+     \filldraw[cyellow]
+       (2,4) rectangle +(1.9,0.9) +(1,.5) node {Bash};
+     \filldraw[ccyan]
+       (1.9,4) -- +(-1,0) -- +(-1,-2) -- +(-1.9,-2) -- +(-1.9,0.9) -- +(0,0.9) -- cycle +(-1,.5) node {App};
+     %\filldraw[cyellow]
+     %  (0,4) rectangle +(1.9,0.9) +(1,.5) node {App};
+     \filldraw[cblue]
+       (7,3) -- +(1,0) -- +(1,-1) -- +(1.9,-1) -- +(1.9,0.9) -- +(0,0.9) -- cycle +(1,.5) node {Lib};
+     \filldraw[corange]
+       (3,3) rectangle +(3.9,0.9) +(2,.5) node {GNU lib};
+     \filldraw[corange]
+       (1,2) -- +(6.9,0) -- +(6.9,0.9) -- +(1.9,0.9) -- +(1.9,1.9) -- +(0,1.9) -- cycle +(3.5,.5) node {GNU libc};
+     \filldraw[cred]
+       (0,1) rectangle +(8.9,0.9) +(4.5,.5) node {Noyau Linux};
+     \filldraw[cgreen]
+       (0,0) rectangle +(8.9,0.9) +(4.5,.5) node {Matériel};
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{La Norme Posix}
+  \begin{itemize}
+  \item \emph{Portable Operating System Interface [for Unix]}
+  \item Uniformise les OS
+  \item Première version publiée en 1988
+  \item Souvent implémenté en partie
+  \item ...  et parfois  s'en inspire simplement 
+    \note[item]{Parler de uC-OS II, \texttt{printf}, etc...}
+  \item Posix $\nrightarrow$ Linux
+  \item Linux $\nrightarrow$ Posix
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Le Projet GNU}
+  \begin{itemize}
+  \item Créé en 1983 par Richard Stallman
+  \item Pose  les bases politiques  de GNU/Linux
+    \note[item]{Expliquer ce qu'est la GPL}
+    \begin{itemize}
+    \item GPL publiée en 1989
+    \item GPLv2 en 1991 
+    \item GPLv3 en 2006
+    \end{itemize}
+  \item \cmd{gcc} apparait en 1985
+    \note[item]{Expliquer ce qu'est gcc} 
+  \item \cmd{bash} et les  Coreutils apparaissent en 1988 (inspirés de
+    \cmd{sh} 1971/1977)
+    \note[item]{Expliquer coreutils}
+    \note[item]{Expliquer   bash} 
+  \item Nombre d'architectures supportées incalculable
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Le noyau Linux}
+  \begin{itemize}
+  \item Créé  en 1991 par  Linus Torvalds \note[item]{Parler  de Linus
+      l'universitaire}
+  \item Système communautaire \note[item]{Parler du lien avec la GPL}
+  \item 15 millions de lignes de code dans 30000 fichiers (+15\%/an)
+  \item Environ 1200 développeurs dans 600 entreprises (+35\%/an)
+  \item Environ 5000 contributeurs depuis la première version de Linux
+  \item  Environ  650  mainteneurs  (c'est-à-dire  responsbales  d'une
+    partie du noyau)
+  \item 24 architecures (= jeux d'instructions)
+  \item Des centaines de plateformes
+  \item Environ 1000 drivers
+  \item Une centaine de versions publiées
+  \item Environ 10000 contributions sur chaque version
+  \item Enormément de ``forks'' et de version non-officielles
+  \item Domaine d'application très large, du DSP au super-calculateurs
+    en passant pas les grille de calcul
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Qu'est-ce qu'une distribution?}
+  \begin{itemize}
+  \item Debian, Ubuntu, Meego,  Red Hat, Suse, ... \note[item] {Parler
+      de Meego, dériv sur Intel, Nokia, Renault, etc... Dire que c'est
+      en plein essort}
+  \item Compilations de programmes disponibles pour GNU/Linux
+  \item Ensemble de normes et de procédure
+  \item Permet de garantir le fonctionnement des programmes distribué
+  \item Notre distribution ``Hôte'': Ubuntu % à vérifier
+  \item Notre distribution ``Cible'': Aucune
+  \end{itemize}
+\end{frame}
+
+\subsection{L'embarqué}
+
+\begin{frame}{Qu'est-ce que l'embarqué?}
+  D'après Wikipedia:
+  \begin{quote}
+    \justify  Un système embarqué  peut être  défini comme  un système
+    électronique et  informatique autonome, qui est dédié  à une tâche
+    bien  précise.   Ses   ressources  disponibles  sont  généralement
+    limitées.   Cette  limitation  est  généralement  d'ordre  spatial
+    (taille limitée) et énergétique (consommation restreinte).
+    \\[2ex]
+    Les systèmes  embarqués font très souvent  appel à l'informatique,
+    et notamment aux systèmes temps réel.
+    \\[2ex]
+    Le terme de système embarqué désigne aussi bien le matériel que le
+    logiciel utilisé.
+  \end{quote}
+\end{frame}
+
+\begin{frame}{Cible et Hôte}
+  \begin{itemize}
+  \item  Nous parlerons  de système  cible  (target, la  board) et  de
+    système hôte (host, votre machine)
+  \item Le  host va nous permettre de  programmer, debugger, contrôler
+    le système cible durant la période de développement
+  \item Le système cible sera ensuite autonome.
+  \item Nous utilisons un Linux sur les deux système. Ca n'est pas une
+    obligation (même, si cela facilite certains automatisme).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{La cible: Calao USB-A9260}
+  \begin{center}
+    \pgfimage[height=5cm]{USB-AT91-1}\hspace{1cm}\pgfimage[height=5cm]
+    {USB-AT91-2}
+  \end{center}
+\end{frame}
+
+\begin{frame}{La cible: Calao USB-A9260}
+  Architecture très classique dans le milieu de Linux embarqué:
+  \begin{itemize}
+  \item Microcontrolleur Atmel AT91SAM9260
+  \item Core ARM926EJ-S 180MHz
+  \item 256Mo de flash
+  \item 64Mo de RAM
+  \item 64Ko d'EEPROM
+  \end{itemize}
+  Choisie car compacte et très bien supportée par Linux
+\end{frame}
+
+  \begin{frame}{Présentation du noyau}
+    Reprendre la présentaion de eLinux
+  \end{frame}
+  \begin{frame}{Telecharger le noyau}
+    Par ftp/http sur kernel.org
+    Par git
+  \end{frame}
+  \begin{frame}{Numerotation du noyau}
+    2.4, 2.6, 3.0  
+  \end{frame}
+
+  %\include{compile}
+  \begin{frame}{Arboresence des sources}
+  \item kernel, mm, arch, drivers, sound, fs, net
+  \item Dans arch: arm, ppc, etc...
+  \item Dans drivers': usb, serial, etc...
+  \end{frame}
+  
+\subsection{Kmake}
+
+\begin{frame}[fragile=singleslide]{Compiler un programme tiers}{Kconfig}
+  \begin{itemize}
+  \item Système de compilation du noyau
+  \item Très bien adapté à la cross-compilation
+  \item   Pour   configurer   les  options:
+    \begin{itemize}    
+    \item En ncurses
+\begin{lstlisting}
+host% apt-get install libncurses5-dev
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- menuconfig
+\end{lstlisting} %$
+    \item En Qt3
+\begin{lstlisting}
+host% apt-get install libqt3-mt-dev
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- xconfig
+\end{lstlisting} %$
+    \end{itemize}
+  \item Ne pas oublier d'installer les headers des bibliothèques
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compiler un programme tiers}{Kconfig}
+  \begin{itemize}
+  \item Pour cross-compiler
+\begin{lstlisting}
+host$ make ARCH=arm CROSS_COMPILE=arm-linux-
+\end{lstlisting} %$
+  \item Pour compiler \emph{out-of-source}
+\begin{lstlisting}
+host$ mkdir build
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build
+\end{lstlisting} %$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compiler un programme tiers}{Kconfig}
+  Principaux points importants:
+  \begin{itemize}
+  \item Adapté au environnements embarqué
+  \item Adapté aux environnements avec beaucoup de configuration
+  \item Initié par le Kernel Linux
+  \item  Pas un  système de  compilation réel. Composé de :
+    \begin{itemize}
+    \item Kconfig, Système de gestion de configuration
+    \item  Kmake, règles  Makefile  bien étudiées.  Chaque projet  les
+      adapte à ces besoins
+    \end{itemize}
+  \item Application de la règle: "Pas générique mais simple à hacker"
+  \item Dépend principalement de \cmd{gmake}
+  \item Mode verbose: \verb+VERBOSE=1+
+  \item Permet d'effectuer des recherche
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compiler un programme tiers}{Kconfig}
+  Test avec busybox:
+  \begin{itemize}
+  \item Préparation
+\begin{lstlisting}
+host$ wget http://busybox.net/downloads/busybox-1.18.3.tar.bz2
+host$ tar xvjf busybox-1.18.3.tar.bz2
+\end{lstlisting} %$
+  \item Récupération d'une configuration par défaut
+\begin{lstlisting}
+host$ make help
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build defconfig
+\end{lstlisting} %$
+  \item Personnalisation de la configuration
+\begin{lstlisting}
+host% apt-get install libncurses5-dev
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build menuconfig
+# Supprimer inetd et le support NFS
+\end{lstlisting} %$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compiler un programme tiers}{Kconfig}
+  Test avec busybox:
+  \begin{itemize}
+  \item Compilation
+\begin{lstlisting}
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- 
+\end{lstlisting} %$
+  \item Installation
+\begin{lstlisting}
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- install
+\end{lstlisting} %$
+  \end{itemize}
+\end{frame}

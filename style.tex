@@ -1,0 +1,148 @@
+%
+% This document is available under the Creative Commons Attribution-ShareAlike
+% License; additional terms may apply. See
+%   * http://creativecommons.org/licenses/by-sa/3.0/
+%   * http://creativecommons.org/licenses/by-sa/3.0/legalcode
+%
+% Copyright 2010 Jérôme Pouiller <jezz@sysmic.org>
+%
+%\documentclass[french,a4paper,10pt]{beamer}
+% Configurationde de Beamer
+\usetheme{Warsaw}
+\usecolortheme[RGB={181,0,0}]{structure}
+% Headers et footers
+\useoutertheme[subsection=false]{smoothbars}
+% Rectangle dans les itemize
+\useinnertheme{rectangles}
+% Pas de symboles pour la navigation
+\setbeamertemplate{navigation symbols}{}
+%\setbeamertemplate{background canvas}{%
+%  \tikz {%
+%    \node at (0,0) {};
+%    \node[inner sep=0pt, opacity=0.2] at (0.5\paperwidth,-0.5\paperheight) {\includegraphics[height=27.2mm,width=65.1mm]{logo}};
+%  }
+%}
+% Ajout des numéros de pages
+\newcommand*\oldinsertshortitle{}%
+\let\oldinsertshorttitle\insertshorttitle%
+\renewcommand*\insertshorttitle{\oldinsertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber}
+
+\usepackage{ucs}                      % La sortie est en UTF8
+\usepackage[utf8x]{inputenc}          % L'entrée aussi
+\usepackage[T1]{fontenc}      % Pour la césure des mots accentués
+\usepackage{lmodern}          % Pour les lettres francaises
+\usepackage[french]{babel}            % Pour la sortie francaise
+\usepackage{times}
+\usepackage{mathptmx}         % Font (don't forget to install latex-font-recommended)
+
+\input{style_tikz}
+
+\ifpdf
+  \usepackage{embedfile} 
+\else
+  \newcommand{\embedfile}[1]{}
+\fi
+
+\usepackage[sections,displaymath]{preview}
+\PreviewEnvironment{tikzpicture}
+\PreviewEnvironment{center}
+\PreviewEnvironment{frame}
+
+\usepackage{hyperref} % Doit être chargé avant ntheorem
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\cmd}[1]{\texttt{#1}}
+\renewcommand{\c}[1]{\cmd{#1}}
+\newcommand{\email}[1]{\href{mailto:#1}{\nolinkurl{<#1>}}}
+
+% \usepackage[]{version} 
+% \usepackage{ntheorem} 
+% \setlength{\theorempreskipamount}{0.8ex plus 0.9ex minus 0.1ex}
+% \setlength{\theorempostskipamount}{0.8ex plus 0.9ex minus 0.1ex}
+% \theoremprework{\vspace{3mm}\hrule}
+% \theorempostwork{\hrule\vspace{3mm}}
+% \theorembodyfont{\itshape}
+% \theoremseparator{.}
+% \newtheorem{quest}{Question}[section]
+
+% \theorembodyfont{\normalfont}
+% \theoremseparator{}
+% \theoremstyle{break}
+% \newtheorem*{ans}{Réponse}
+
+% \setlength{\theoremindent}{3mm}
+% \theoremseparator{:}
+% \theorembodyfont{\itshape}
+% \theoremstyle{plain}
+% \newtheorem*{man}{Documentation utile}
+% \theorembodyfont{\normalfont}
+% \newtheorem*{hint}{Remarque}
+% \newtheorem*{note}{Note pédagogique}
+
+% \usepackage[vmargin=25mm,hmargin=15mm]{geometry}          % Marges peronnalisées
+
+% Quelques règlage de mise en page
+%\renewcommand{\baselinestretch}{1.2} % taille de l'interligne
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.9ex plus 0.5ex minus 0.2ex}
+
+%\usepackage{fancyhdr}        % Fancy page headers
+%\lhead{}                     % Top-Left
+%\chead{}                     % Top-Center
+%\rhead{}                     % Top-Right
+%\lfoot{}                     % Bottom-Left
+%\cfoot{}                     % Bottom-Center
+%\rfoot{}                     % Bottom-Right
+%\pagestyle{fancy}
+
+\usepackage{listings}         % Pour mettre en page du code source
+\usepackage{color}            % Pour les lien en couleur dans le pdf
+\definecolor{colBg}        {rgb}{1,1,0.8}
+\definecolor{colKeys}      {rgb}{0,0,1}
+\definecolor{colComments}  {rgb}{1,0,0}
+\definecolor{colString}    {rgb}{0,0.5,0}
+\definecolor{colBasic}     {rgb}{0,0,0}
+\definecolor{colIdentifier}{rgb}{0,0,0}
+\lstset{%                     % Basic style
+  numbers=left,%
+  stepnumber=10,%
+  numberstyle=\scriptsize,%
+%
+  basicstyle=\ttfamily\normalsize\color{colBasic},%
+  commentstyle=\normalsize\itshape\color{colComments},%
+  identifierstyle=\color{colIdentifier},%
+  keywordstyle=\bf\ttfamily\color{colKeys},%
+  stringstyle=\color{colString},%
+  backgroundcolor=\color{colBg},%
+%
+%  mathescape=true,%
+  extendedchars=false,%
+%  tabsize=4,%
+  columns=flexible,%
+  fontadjust=true,%
+  frame=lines,%
+  showspaces=false,%
+  showstringspaces=false,%
+%
+  emptylines=1,%
+  breaklines=true,%
+  breakautoindent=true,%     % Inutile avec breaklines=false
+  %literate={\'e}{{\'e}}1 {\`e}{{\`e}}1 {\^o}{{\^o}}1
+}
+\lstset{language=C++}        % ... En C++
+
+\definecolor{darkgreen}{rgb}{0, 0.7, 0}
+\definecolor{darkgreen2}{rgb}{0, 0.5, 0}
+\definecolor{red2}{rgb}{0.8, 0, 0}
+\lstdefinelanguage{diff} {
+    morecomment=[f][\color{darkgreen}][0]{+},
+    morecomment=[f][\color{red}][0]{-},
+    morecomment=[f][\itshape\color{darkgreen2}][0]{+++},
+    morecomment=[f][\itshape\color{red2}][0]{---},
+    moredelim=[l][\color{cyan}]{\ \@\@},
+    moredelim=*[l][\color{blue}]{\@\@},
+}
+
+\hypersetup{colorlinks=true,plainpages=false,urlcolor=blue,linkcolor=}
+
+
+

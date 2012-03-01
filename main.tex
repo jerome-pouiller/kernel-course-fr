@@ -1,0 +1,80 @@
+%
+% This document is available under the Creative Commons Attribution-ShareAlike
+% License; additional terms may apply. See
+%   * http://creativecommons.org/licenses/by-sa/3.0/
+%   * http://creativecommons.org/licenses/by-sa/3.0/legalcode
+%
+% Copyright 2010 Jérôme Pouiller <jezz@sysmic.org>
+%
+
+% Pour faire une version imprimable, avec les notes sans overlay
+% \PassOptionsToClass{notes=show,handout}
+% Pour en faire un article
+% \documentclass[a4paper]{article}
+
+\documentclass[10pt,ucs,usepdftitle=false]{beamer}
+\usepackage{beamerarticle}
+
+% Pour mettre deux pages sur une
+\usepackage{pgfpages}
+%\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+%\setbeameroption{show notes on second screen=right}
+
+\input{style}
+                        
+% Apparait sur chaque slide:
+\logo{\pgfimage[height=5mm]{pics/logo}}
+ 
+\title{Formation au Noyau Linux}
+\hypersetup{pdftitle={Formation au Noyau Linux}}
+% \subtitle{Sous-titre}
+\author[J. Pouiller]{Jérôme Pouiller \email{j.pouiller@sysmic.org}}
+\hypersetup{pdfauthor={Jérôme Pouiller}}
+\institute[Sysmic]{\hspace*{1cm}\pgfimage[height=1.5cm]{pics/logo}}
+% Plus complet:
+% \institute[Sysmic]{
+%   \inst{1} \hspace*{1cm}\includegraphics[height=1.5cm]{logo}
+%   \and
+%   \inst{2} \includegraphics[height=1.5cm]{logo-apollo}
+% }
+\date[Mar. 2012]{Mars 2012}
+% Pour le PDF seulement:
+% \subject{Temps Réel}
+% \keywords{temps réel, thread, xenomai, OS, Linux}}
+  
+\begin{document}
+ 
+  \begin{frame}[plain]
+    \maketitle
+  \end{frame}
+  \note{Parler de moi, de mon CV, boulot, freelance, sysmic, expertise, Polytech Paris}
+
+  \begin{frame}{Sommaire}
+    \begin{itemize} 
+      \item 
+    \end{itemize} 
+  \end{frame}
+  
+  \include{presentation}
+  \include{compile}
+  \include{modules}
+  %\include{API}
+  \begin{frame}{API}
+
+     copy_to/from_user
+     MMIO/PIO
+     Interruptions
+     Les accès concurrents
+     DMA
+     mmap
+   \end{frame} 
+  \include{debug}
+  %\include{participate}
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,345 @@
+% This document is available under the Creative Commons Attribution-ShareAlike
+% License; additional terms may apply. See
+%   * http://creativecommons.org/licenses/by-sa/3.0/
+%   * http://creativecommons.org/licenses/by-sa/3.0/legalcode
+%
+% Copyright 2010 Jérôme Pouiller <jezz@sysmic.org>
+%
+
+\part{Modules noyau}
+
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \tableofcontents[currentpart]
+\end{frame}
+
+\section{Création de modules}
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  \lstinputlisting[language=c,firstline=16]{modules/my_module1.c}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Quelques macros de base}
+  Ces macros  permettent de placer  des informations sur  des symboles
+  particulier dans module;
+  \begin{itemize} 
+  \item Déclare la fonction à apeller lors du chargement du module (traditionnellement module\texttt{\_init})
+    \begin{lstlisting} 
+module_init
+    \end{lstlisting} 
+  \item Déclare la fonction à appeller lors du déchargement du module (traditionnellement module\texttt{\_exit})
+    \begin{lstlisting} 
+module_exit
+    \end{lstlisting} 
+  \item Déclare un paramètre
+    \begin{lstlisting}
+module_param
+    \end{lstlisting}
+  \item Documente un paramètre pour modinfo
+    \begin{lstlisting}
+MODULE_PARM_DESC
+    \end{lstlisting}
+  \item Déclare un auteur du fichier. Peut apparaitre plusieurs fois.
+    \begin{lstlisting}
+MODULE_AUTHOR
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile=singleslide]{Quelques macros de base}
+  \begin{itemize} 
+  \item Description du modules
+    \begin{lstlisting}
+MODULE_DESCRIPTION
+    \end{lstlisting}
+  \item License. Indispensable
+    \begin{lstlisting}
+MODULE_LICENSE
+    \end{lstlisting}
+  \item Version du module
+    \begin{lstlisting}
+MODULE_VERSION
+    \end{lstlisting}
+  \item Rend le symbole visible par les autres modules.  Il sera alors
+    pris en compte dans le calcul des dépendances de symboles.
+    \begin{lstlisting}
+EXPORT_SYMBOL
+    \end{lstlisting} 
+  \item Idem \cmd{EXPORT\_SYMBOL} mais  ne permet sont utilisation que
+    pour les modules GPL
+    \begin{lstlisting}
+EXPORT_SYMBOL_GPL
+    \end{lstlisting} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Parlons des licenses}
+  Le noyau est sous license GPL. Néanmoins, le débat est ouvert sur la
+  possibilité  qu'un module  propriétaire puisse  se linker  avec.  Le
+  débat n'est pas  tranché. Le noyau laisse la  possibilité à l'auteur
+  d'exporter   ses   modules   avec   \verb+EXPORT_SYMBOL+   ou   avec
+  \verb+EXPORT_SYMBOL_GPL+.
+\\[2ex]
+  Si vous développez un module Propriétaire, vous n'aurez pas accès à
+  toute l'API du noyau (environ 90\% seulement).
+\\[2ex]
+  Il est néanmoins possible de contourner le problème en utilisant un
+  module intermédiaire comme proxy logiciel.
+\\[2ex]
+
+De plus, un module propriétaire  ne doit pas compiler en statique avec
+le noyau (le  résultat est alors considéré comme  un travail dérivé du
+noyau). Il doit rester sous la forme d'un module.
+
+  En  remplissant  correctement  la  macro  \verb+MODULE_LICENCE+,  le
+  système   de  compilation  du   noyau  empêchera   les  compilations
+  illégales.  \verb+MODULE_LICENCE+  peut  prendre plusieurs  valeurs:
+  GPL, GPL v2, GPL and additionnal rights, Dual MIT/GPL, Dual BSD/GPL,
+  Dual  MPL/GPL.  Toutes  les  autre valeurs  sont  considérées  comme
+  propriétaire.
+
+  \verb+/proc/sys/kernel/tainted+ (ou \cmd{uname -a}) indique si des modules propriétaires sont chargé. 
+  
+  Quels conséquences?
+  \begin{itemize} 
+  \item Pas de support de la part de la communauté
+  \end{itemize} 
+\end{frame}
+
+\begin{frame}{Headers}
+  Il  n'est  pas   possible  pour  le  noyau  de   compiler  avec  des
+  bibliothèques  extérieur.  En particulier  avec  la  libc. Tous  les
+  headers habituels sont donc inaccessible dans le noyau.
+
+  Les headers ``publiques'' sont dans \verb+include/+. On retiendra en
+  particulier:     linux/module.h,     linux/init.h,    linux/kernel.h
+  indispensables pour compiler un module.
+
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  \lstinputlisting[language=c,lastline=14]{modules/my_module1.c}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  Makefile:
+  \begin{lstlisting}
+obj-m := my_module.o  
+  \end{lstlisting}
+  Puis, on appelle:
+  \begin{lstlisting}
+host$ KDIR=/lib/modules/$(uname -r)/build
+host$ make -C $KDIR ARCH=arm SUBDIRS=$(pwd) modules
+  \end{lstlisting} % $
+  Pour améliorer le processus, on ajoute ces lignes dans le Makefile:
+  \begin{lstlisting}
+KDIR ?= /lib/modules/$(shell uname -r)/build
+
+default:
+        $(MAKE) -C $(KDIR) SUBDIRS=$(shell pwd) modules
+  \end{lstlisting}
+  et on appelle
+  \begin{lstlisting}
+host$ make ARCH=arm KDIR=../linux-2.6/usb-a9260 
+  \end{lstlisting} % $
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compilation avec KConfig}
+  Makefile:
+  \begin{lstlisting}
+obj-$(MY_COMPILE_OPTION) := my_module.o  
+  \end{lstlisting} % $
+  \verb+$(MY_COMPILE_OPTION)+ sera remplacé par :
+  \begin{itemize}
+  \item ø: Non compilé
+  \item m: compilé en module
+  \item y: compilé en statique
+  \end{itemize}
+  Kconfig
+  \lstinputlisting[langage=]{modules/Kconfig}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Gérer les modules}
+  \begin{itemize} 
+  \item Avoir des informations sur le module
+    \begin{lstlisting}
+host$ modinfo my_module.ko
+    \end{lstlisting} %$
+  \item Charger un module
+    \begin{lstlisting}
+target% insmod my_module.ko
+    \end{lstlisting} %$
+  \item Décharger un module
+    \begin{lstlisting}
+target% rmmod my_module
+    \end{lstlisting}%$
+  \item Afficher le buffer de log du kernel
+    \begin{lstlisting}
+target$ dmesg
+    \end{lstlisting} %$
+  \item Charger/décharger un module correctement installé/indexé
+    \begin{lstlisting}
+target% modprobe my_module
+target% modprobe -r my_module
+    \end{lstlisting} %$
+  \item Mettre à jour le fichier de dépendance
+    \begin{lstlisting} 
+target% depmod
+    \end{lstlisting} %$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Paramètres}
+  Il est possible de passer des paramètres aux modules:
+  \begin{lstlisting}
+target$ modinfo my_module.ko 
+target% insmod my_module.ko param=2  
+  \end{lstlisting} %$ 
+  Nous devons déclarer le paramètre à l'aide de la macro \texttt{module\_param}. 
+  \begin{lstlisting}[language=c]
+#include <linux/moduleparam.h>
+module_param(param, int, 0644);
+  \end{lstlisting} 
+  La paramètre doit évidement être alloué:
+  \begin{lstlisting}[language=c]
+static int param = 0;
+  \end{lstlisting} 
+  Il est fortement recommandé de documenter le paramètre
+  \begin{lstlisting}[language=c]
+MODULE_PARM_DESC(param, "Display this value at loading and unloading");
+  \end{lstlisting} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{\texttt{/sys}}
+  Etudions \file{/sys}
+  \begin{itemize}
+  \item                       \file{/sys/module/my\_module/parameters}:
+    paramètres. Modifiable si déclaré modifiables
+  \item \file{/sys/module/my\_module/sections}:  des info sur  la zone
+    de chargement
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  Quelques conseils:
+  \begin{itemize} 
+  \item  Pour mettre un code à la norme:
+    \begin{lstlisting}
+host$ apt-get indent
+host$ scripts/Lindent my_module.c
+host$ scripts/cleanfile my_module.c
+    \end{lstlisting} %$
+  \item Voir \file{Documentation/CodingStyle}
+  \item Sauvez l'espace de nom du noyau: utilisez des static !
+  \item Votre code doit être réentrant
+  \end{itemize} 
+\end{frame}
+
+\section{Notre premier device}
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+  \begin{itemize}
+  \item Voie classique pour un driver pour communiquer avec le noyau
+  \item Major, Minor
+    \begin{lstlisting}
+target% mknod my_chardev c <major> <minor>
+    \end{lstlisting}
+  \item Communication en écrivant/lisant des données
+    \begin{lstlisting}
+target% insmod my_chardev.ko
+target% echo toto >  my_dhardev
+target% cat my_chardev
+    \end{lstlisting}
+  \item Possibilité de faire un peu de configuration par les ioctl
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+  Exo: Faire un pipe avec un buffer:
+  \begin{lstlisting}
+target% insmod my_chardev.ko
+target% echo toto >  my_dhardev
+target% cat my_chardev
+toto
+  \end{lstlisting}
+  \begin{itemize}
+  \item \verb+copy_to_user+, \verb+copy_from_user+
+  \item \verb+kcalloc+, \verb+kfree+
+  \item \verb+register_chrdev+, \verb+unregister_chrdev_region+
+  \item   \verb+mutex_lock+,  \verb+mutex_unlock+,  \verb+mutex_init+,
+    \verb+mutex_destroy+
+  \item \verb+memmove+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+   Vérifions votre comportement:
+   \begin{lstlisting}
+target% insmod my_chrdev.ko
+target% mknod my_chrdev c 251 0
+target$ for i in {1..64}; echo "$i " > my_chrdev
+target$ cat my_chrdev
+target% rmmod my_chrdev
+target% insmod my_chrdev.ko buf_size=2
+target$ echo foo > /dev/my_chrdev
+target$ cat /dev/my_chrdev
+target% rmmod my_chrdev
+target% insmod my_chrdev.ko buf_size=-1
+    \end{lstlisting} % $
+\end{frame}
+ 
+% \begin{frame}{Les ioctls}
+%   C'est un appel système qui permet de faire passer une structure
+%   quelconque à un device.\\
+%   Pour appeller un ioctl, il faut un device, le numéro de l'IOCTL et
+%   l'arguments.\\
+%   Les  numéro d'IOCTL  se  décode ainsi  (attention,  ca n'est  qu'une
+%   norme, et elle a ses exeception, principalement powerpc):
+% %   \begin{lstlisting}
+% %  bits    meaning
+% %  31-30  00 - no parameters: uses _IO macro
+% %         10 - read: _IOR
+% %         01 - write: _IOW
+% %         11 - read/write: _IOWR
+% % 
+% %  29-16  size of arguments
+% % 
+% %  15-8   ascii character supposedly
+% %         unique to each driver
+% % 
+% %  7-0    function #
+% % 
+% % 
+% % So for example 0x82187201 is a read with arg length of 0x218,
+% % character 'r' function 1. Grepping the source reveals this is:
+% % Les ioctl doivent être unique par device. Mais on préfère qu'il soit unique
+% % sur tout le système.
+% % 
+% % Les macro _IOR, _IOW, _IORW et _IO nous aident:
+% % #define CHANGE_BUF_SZ _IOR(42, 1, int)
+% %    \end{lstlisting}
+
+% Aller plus loin: \file{device.h}: Implémentation d'un device complet.
+% \end{frame}
+
+\begin{frame}[fragile=singleslide]{Obtenir de la documentation}
+  \begin{lstlisting}
+host$ make mandocs
+host% make installmandocs
+  \end{lstlisting}  % $
+  \begin{itemize}
+    \item Paquet linux-doc: \file{/usr/share/doc/linux-doc/html/kernel-api}
+    \item Pas de paquet pour ces pages de man 
+    \item ou pages de man sur \url{http://tfm.cz}
+  \end{itemize}
+\end{frame}
+
+% TODO: Faire un device usb-gadget/hid 
+
+% Note
+% echo none > /sys/devices/platform//leds-gpio/leds/user_led/trigger
+% echo 255 > /sys/devices/platform//leds-gpio/leds/user_led/brightness
+
