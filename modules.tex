@@ -38,6 +38,19 @@ module_exit
     \begin{lstlisting}
 module_param
     \end{lstlisting}
+    Prend en paramètres:
+    \begin{itemize} 
+      \item \cmd{name}: Nom de la variable utilisée comme paramètre
+      \item  \cmd{type}: Type  du paramètre  (\cmd{bool}, \cmd{charp},
+        \cmd{byte}, \cmd{short},  \cmd{ushort}, \cmd{int}, \cmd{uint},
+        \cmd{long}, \cmd{ulong})  (remarquez que ca  ne correspond pas
+        tout à  fait aux types C. Particulièrement  pour \cmd{bool} et
+        \cmd{charp})
+      \item       \cmd{perm}:       Permissions       du       fichier
+        \file{/sys/module/<module>/parameters/<param>}.  (utiliser les
+        macros  de \file{linux/stat.h}). Si  0, le  fichier n'apparait
+        pas.
+      \end{itemize} 
   \item Documente un paramètre pour modinfo
     \begin{lstlisting}
 MODULE_PARM_DESC
