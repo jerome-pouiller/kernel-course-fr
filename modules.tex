@@ -10,29 +10,287 @@
 %
 
 \part{Les modules}
+\section{Création de modules}
 
-  insmod/rmmmod
-  modprobe
-  Compiler à l'extérieur du kernel
-  Les Macro
-    Les paramètres
-    /sys/**/param
-  Les licences
-  Compiler à l'interieur du kernel
-  Fonctionnement de Kconfig
-  Programmer
-    Le coding style
-    La documentation
-    la libc
-    Big Endian/Little Endian
-    Preemption (nous y reviendrons)
-    Les espace mémoire : copy_to_user copy_from_user
-    Segfault: n'existe pas
-  Les fichier device
-    mknod
-    devtmpfs
-  Les appels systèmes
-  Les structure de pointeurs sur fonctions
+  % insmod/rmmmod
+  % modprobe
+  % Compiler à l'extérieur du kernel
+  % Les Macro
+  %   Les paramètres
+  %   /sys/**/param
+  % Les licences
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  \lstinputlisting[language=c,firstline=16]{modules/my_module1.c}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Quelques macros de base}
+  Ces macros  permettent de placer  des informations sur  des symboles
+  particulier dans module;
+  \begin{itemize} 
+  \item Déclare  la fonction  à apeller lors  du chargement  du module
+  (traditionnellement module\texttt{\_init})
+    \begin{lstlisting} 
+module_init
+    \end{lstlisting} 
+  \item Déclare la fonction à  appeller lors du déchargement du module
+  (traditionnellement module\texttt{\_exit})
+    \begin{lstlisting} 
+module_exit
+    \end{lstlisting} 
+  \item Déclare un paramètre
+    \begin{lstlisting}
+module_param
+    \end{lstlisting}
+    Prend en paramètres:
+    \begin{itemize} 
+      \item \cmd{name}: Nom de la variable utilisée comme paramètre
+      \item  \cmd{type}: Type  du paramètre  (\cmd{bool}, \cmd{charp},
+        \cmd{byte}, \cmd{short},  \cmd{ushort}, \cmd{int}, \cmd{uint},
+        \cmd{long}, \cmd{ulong})  (remarquez que ca  ne correspond pas
+        tout à  fait aux types C. Particulièrement  pour \cmd{bool} et
+        \cmd{charp})
+      \item       \cmd{perm}:       Permissions       du       fichier
+        \file{/sys/module/<module>/parameters/<param>}.  (utiliser les
+        macros  de \file{linux/stat.h}). Si  0, le  fichier n'apparait
+        pas.
+      \end{itemize} 
+  \item Documente un paramètre pour modinfo
+    \begin{lstlisting}
+MODULE_PARM_DESC
+    \end{lstlisting}
+  \item Déclare un auteur du fichier. Peut apparaitre plusieurs fois.
+    \begin{lstlisting}
+MODULE_AUTHOR
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile=singleslide]{Quelques macros de base}
+  \begin{itemize} 
+  \item Description du modules
+    \begin{lstlisting}
+MODULE_DESCRIPTION
+    \end{lstlisting}
+  \item License. Indispensable
+    \begin{lstlisting}
+MODULE_LICENSE
+    \end{lstlisting}
+  \item Version du module
+    \begin{lstlisting}
+MODULE_VERSION
+    \end{lstlisting}
+  \item Rend le symbole visible par les autres modules.  Il sera alors
+    pris en compte dans le calcul des dépendances de symboles.
+    \begin{lstlisting}
+EXPORT_SYMBOL
+    \end{lstlisting} 
+  \item Idem \cmd{EXPORT\_SYMBOL} mais  ne permet sont utilisation que
+    pour les modules GPL
+    \begin{lstlisting}
+EXPORT_SYMBOL_GPL
+    \end{lstlisting} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Parlons des licenses}
+  Le noyau est sous license GPL. Néanmoins, le débat est ouvert sur la
+  possibilité  qu'un module  propriétaire puisse  se linker  avec.  Le
+  débat n'est pas  tranché. Le noyau laisse la  possibilité à l'auteur
+  d'exporter   ses   modules   avec   \verb+EXPORT_SYMBOL+   ou   avec
+  \verb+EXPORT_SYMBOL_GPL+.
+  \\[2ex]
+  Si vous développez un module Propriétaire, vous n'aurez pas accès à
+  toute l'API du noyau (environ 90\% seulement).
+  \\[2ex]
+  Il est néanmoins possible de contourner le problème en utilisant un
+  module intermédiaire comme proxy logiciel.
+  \\[2ex]
+  De plus,  un module  propriétaire ne doit  pas compiler  en statique
+  avec  le noyau  (le résultat  est alors  considéré comme  un travail
+  dérivé du noyau). Il doit rester sous la forme d'un module.
+  \\[2ex]
+  En  remplissant  correctement  la  macro  \verb+MODULE_LICENCE+,  le
+  système   de  compilation  du   noyau  empêchera   les  compilations
+  illégales.   \verb+MODULE_LICENCE+ peut  prendre  plusieurs valeurs:
+  GPL, GPL v2, GPL and additionnal rights, Dual MIT/GPL, Dual BSD/GPL,
+  Dual  MPL/GPL.   Toutes les  autre  valeurs  sont considérées  comme
+  propriétaire.
+
+  \file{/proc/sys/kernel/tainted} (ou  \cmd{uname -a}) indique  si des
+  modules propriétaires sont chargé.
+  
+  Quels conséquences?
+  \begin{itemize} 
+  \item Pas de support de la part de la communauté
+  \end{itemize} 
+\end{frame}
+
+\begin{frame}{Headers}
+  Il  n'est  pas   possible  pour  le  noyau  de   compiler  avec  des
+  bibliothèques  extérieur.  En  particulier  avec la  libc. Tous  les
+  headers habituels sont donc inaccessible dans le noyau.
+
+  Les headers ``publiques'' sont dans \verb+include/+. On retiendra en
+  particulier:       \file{linux/module.h},       \file{linux/init.h},
+  \file{linux/kernel.h} indispensables pour compiler un module.
+
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  \lstinputlisting[language=c,lastline=14]{modules/my_module1.c}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  Makefile:
+  \begin{lstlisting}
+obj-m := my_module.o  
+  \end{lstlisting}
+  Puis, on appelle:
+  \begin{lstlisting}
+host$ KDIR=/lib/modules/$(uname -r)/build
+host$ make -C $KDIR ARCH=arm SUBDIRS=$(pwd) modules
+  \end{lstlisting} % $
+  Pour améliorer le processus, on ajoute ces lignes dans le Makefile:
+  \begin{lstlisting}
+KDIR ?= /lib/modules/$(shell uname -r)/build
+
+default:
+        $(MAKE) -C $(KDIR) SUBDIRS=$(shell pwd) modules
+  \end{lstlisting}
+  et on appelle
+  \begin{lstlisting}
+host$ make ARCH=arm KDIR=../linux-2.6/usb-a9260 
+  \end{lstlisting} % $
+\end{frame}
+
+  % Compiler à l'interieur du kernel
+  % Fonctionnement de Kconfig
+\begin{frame}[fragile=singleslide]{Compilation avec Kmake}
+  Makefile:
+  \begin{lstlisting}
+obj-$(MY_COMPILE_OPTION) := my_module.o  
+  \end{lstlisting} % $
+  \lstinline+$(MY_COMPILE_OPTION)+ sera remplacé par :
+  \begin{itemize}
+  \item ø: Non compilé
+  \item m: compilé en module
+  \item y: compilé en statique
+  \end{itemize}
+  Kconfig
+  \lstinputlisting[langage=]{modules/Kconfig}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Gérer les modules}
+  \begin{itemize} 
+  \item Avoir des informations sur le module
+    \begin{lstlisting}
+host$ modinfo my_module.ko
+    \end{lstlisting} %$
+  \item Charger un module
+    \begin{lstlisting}
+target% insmod my_module.ko
+    \end{lstlisting} %$
+  \item Décharger un module
+    \begin{lstlisting}
+target% rmmod my_module
+    \end{lstlisting}%$
+  \item Afficher le buffer de log du kernel
+    \begin{lstlisting}
+target$ dmesg
+    \end{lstlisting} %$
+  \item Charger/décharger un module correctement installé/indexé
+    \begin{lstlisting}
+target% modprobe my_module
+target% modprobe -r my_module
+    \end{lstlisting} %$
+  \item Mettre à jour le fichier de dépendance
+    \begin{lstlisting} 
+target% depmod
+    \end{lstlisting} %$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Paramètres}
+  Il est possible de passer des paramètres aux modules:
+  \begin{lstlisting}
+target$ modinfo my_module.ko 
+target% insmod my_module.ko param=2  
+  \end{lstlisting} %$ 
+  Nous   devons  déclarer   le  paramètre   à  l'aide   de   la  macro
+  \texttt{module\_param}.
+  \begin{lstlisting}[language=c]
+#include <linux/moduleparam.h>
+module_param(param, int, 0644);
+  \end{lstlisting} 
+  La paramètre doit évidement être alloué:
+  \begin{lstlisting}[language=c]
+static int param = 0;
+  \end{lstlisting} 
+  Il est fortement recommandé de documenter le paramètre
+  \begin{lstlisting}[language=c]
+MODULE_PARM_DESC(param, "Display this value at loading and unloading");
+  \end{lstlisting} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{\texttt{/sys}}
+  Etudions \file{/sys}
+  \begin{itemize}
+  \item                       \file{/sys/module/my\_module/parameters}:
+    paramètres. Modifiable si déclaré modifiables
+  \item \file{/sys/module/my\_module/sections}:  des info sur  la zone
+    de chargement
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Programmer}
+  Queleques conseils:
+  \begin{itemize} 
+    \item Le Coding Style
+      \begin{itemize} 
+        \item Indentation  la 
+\end{itemize} 
+  \end{itemize} 
+\end{frame} 
+
+% \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+%   Quelques conseils:
+%   \begin{itemize} 
+%   \item  Pour mettre un code à la norme:
+%     \begin{lstlisting}
+% host$ apt-get indent
+% host$ scripts/Lindent my_module.c
+% host$ scripts/cleanfile my_module.c
+%     \end{lstlisting} %$
+%   \item Voir \file{Documentation/CodingStyle}
+%   \item Sauvez l'espace de nom du noyau: utilisez des static !
+%   \item Votre code doit être réentrant
+%   \end{itemize} 
+% \end{frame}
+
+  % Programmer
+  %   Le coding style
+  %   La documentation
+  %   la libc
+  %   Big Endian/Little Endian
+  %   Preemption (nous y reviendrons)
+  %   Les espace mémoire : copy_to_user copy_from_user
+  %   Segfault: n'existe pas
+  %   Gestion des erreurs:
+  %       -EAGAIN, etc...
+  %       goto
+  %        errno.h
+  %    Les types: 
+  %      u8...u64, s8...s64
+  %      __le16..__le64 __be16..__be64
+  %      void* et unsigned long et phys_addr_t
+ %       linux/types.h
+  %      bool mais pas utilisé
+  %      Les types de la libc, utilisé pour communique avec l'espace utilisateur: pid_t, uid_t, etc...
+  % Les fichier device
+  %   mknod
+  %   devtmpfs
+  % Les appels systèmes
+  % Les structure de pointeurs sur fonctions
 
 
 

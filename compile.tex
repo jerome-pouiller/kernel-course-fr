@@ -11,49 +11,810 @@
 
 \part{Compiler}
 
-  Organisation des sources
-    (kernel mm arch) (network ipc fs) (driver sound) (security lib crypto) include (scripts kconfig) Documentation
-  Les cibles principales
-    O=
-    V=
-    C=
-    -j X
-    defconfig
-    menuconfig/nconfig
-    oldconfig
-    modules
-    modules_install
-    *Image
-    clean/distclean/mrproper
-  Les option importantes
-    ARCH
-    CROSS_COMPILE
-    LOCAL_VERSION
-    HZ
-    SMP
-    CMDLINE
-    PREEMPT
-    HACKING
-    XIP
-    EMBEDED
-    PROCFS
-    INITRAMFS
-    KVM/XEN/VBOX
-  Les rédultats
-    vmlinux  Image *Image.s3
-    le bootloader (decompression)
-    vmlinuz  zImage bzImage uImage
-  Fabriquer un initramfs
-  La commandline
-    init
-    root
-    ip
-    root=/dev/nfs
-    mem
-    memarea
-    panic
-    <module>.<option>
-  Le répertoire /proc
+\section{Obtenir le noyau}
+
+\begin{frame}[fragile=singleslide]{Qu'est-ce qu'un BSP?}
+  \begin{itemize} 
+  \item \emph{Board Support Package (BSP)}
+  \item Normalement fourni par l'intégrateur.
+  \item  Contient  au   minimum  la  toolchain  (compilateur,  linker,
+    debuggueur) pour la cible, au  minimum les sources, et souvent des
+    versions précompilées
+  \item  Cette toolchain est  souvent compilée  avec une  libc (glibc,
+    µclibc, newlib,  bionic, eglibc,  dietlibc, kilbc, etc...)  et une
+    version des binutils. Si ca n'est pas le cas, elle pourra compiler
+    le noyau Linux, mais aucune binaire utilisateur.
+  \item  Contient souvent  le  bootloader (sources  et/ou binaire)  le
+    noyau  Linux  (au minimum  les  sources,  et  parfois une  version
+    précompilée).
+  \item Si la  cible possède des drivers spécifique  externes à Linux,
+    ils doivent (devraient) être fournis avec la toolchain.
+  \item  De même,  si la  cible doit  utiliser  certaine bibliothèques
+    spécifiques, elle sont normalement fournies
+  \item Contient la documentation (parfois incomplète...)
+  \item Assez souvent, une arborescence de fichier est fournie
+\end{itemize} 
+\note{A intégrer dans embede_linux}
+\end{frame} 
 
 
+  % git
+  %   tag: Une version particuliere avec "git co"
+  %   Les differents depots
+  % http
+\begin{frame}[fragile=singleslide]{Récupération des sources}
+  Ou récupérer les sources du noyau?
+  \begin{enumerate}
+  \item Utiliser les sources souvent  fournies avec ls BSP.  Il arrive
+    souvent qu'elles contiennent  des drivers particuliers et qu'elles
+    soient déjà configurées
+  \item Télecharger sur \file{kernel.org}
+    \note[item]{Fonctionne aussi avec 2.6.37}
+    \begin{lstlisting}
+host$ wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.33.7.tar.bz2
+host$ tar xvjf linux-2.6.33.7.tar.bz2
+    \end{lstlisting}
+  \item Utiliser \cmd{git clone}:
+    \note[item] Présenter git
+    \begin{itemize} 
+    \item \cmd{git} est l'outil de gestion de source du noyau
+    \item  Il est fortement  recommander de  l'utiliser dans  le cadre
+      d'un développement du noyau
+    \item Il s'agit d'un système de gestion décentralisé. 
+    \item Pour expliquer la décentralisation, imaginez que
+      \begin{itemize} 
+      \item vous dupliquez un dépôt svn
+      \item vous faites des modifications sur les deux dépôts
+      \item vous essayez de resynchronisez les deux...
+      \item  Considérez git  comme  un svn  capable d'effectuer  cette
+        opération très simplement.
+      \item Lorsque  vous récupérez le  code d'un dépôt,  vous devenez
+        vous même dépôt
+      \item Si vous  laissez un moyen quelconque d'accès  en lecture à
+        votre dépôt, d'autres personne  pourrons à leur tour le cloner
+        ou tirer les modification que vous avez effectuez
+      \end{itemize} 
+    \item \url{http://git.kernel.org}  liste les dépôts  publiques des
+      principaux développeurs du noyau
+    \item Pour récupérer un dépôt:
+      \begin{lstlisting} 
+git clone <depôt>
+      \end{lstlisting} 
+    \item Remarquons en particulier:
+      \begin{itemize} 
+      \item
+        \url{git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git}
+        Le dépôt de Linus Torvalds. Il contient les derniers patchs du
+        noyau en dévelopement
+      \item
+        \url{git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git}
+        Le dépot stable. Contient la dernière version stable du noyau,
+        ainsi les les patches des version stables.
+      \item
+        \url{git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git}
+        Les dépôt  une dizaine  de sous-projets importants  sont mergé
+        automatiquement dans ce  dépôt. Utilisé principalement par des
+        robots afin d'identitifier les  problème de merge en amont des
+        ohases d'intégrations
+      \item
+        \url{git://git.kernel.org/pub/scm/linux/kernel/git/tglx/history.git}
+        L'historique des versions entre 2.5.0 et 2.6.12.
+      \end{itemize} 
+      \begin{lstlisting} 
+host$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+      \end{lstlisting} 
+      Chaque version du noyau est marquée avec un tag
+      \begin{lstlisting} 
+host$ git tag
+      \end{lstlisting} 
+      Puis il est possible de réucpérer une version avec
+      \begin{lstlisting}
+host$ git checkout v2.6.38
+      \end{lstlisting}
+      Votre  dépôt  est alors  non-modifiable.  Vous  devez créer  une
+      branche de travail:
+      \begin{lstlisting}
+host$ git checkout -b mybranch v2.6.38
+      \end{lstlisting}
+    \end{itemize}  
+  \end{enumerate}
+\end{frame}
+
+\section{Organisation des sources}
+
+\begin{frame}[fragile=singleslide]{Organisation des sources}
+  On remarque qu'il existent d'énorme différences de tailles entre les
+  répertoires:
+  \begin{lstlisting}
+$ du -s */ | sort -n | column
+40      usr              4092    scripts
+156     samples          5248    kernel
+160     init             6436    firmware
+180     virt             19524   Documentation
+232     ipc              21332   net
+884     block            22728   include
+1904    crypto           24016   sound
+1932    lib              32436   fs
+2076    security         121584  arch
+2400    mm               252688  drivers
+3536    tools
+  \end{lstlisting} 
+  \begin{itemize} 
+  \item Les services indispensable à un OS:
+    \begin{itemize} 
+    \item  \file{kernel}  Le scheduler  de  tâches,  les framework  de
+      gestion  des   IRQ,  le  loader  de   binaires,  diverses  autre
+      fonctionnalités ne rentrant dans aucune autre catégories.
+    \item  \file{mm} Le  gestionnaire de  mémoire. Considéré  comme la
+      partie la plus complexe du noyau
+    \item   \file{init}   La    fonction   de   démarrage   du   noyau
+      (\c{start_kernel}).
+    \item  \file{arch} Le  code spécifique  à chaque  architecture. En
+      particulier,  le code nécessaire  au boot,  à la  génération des
+      images,   les   routine   assembleur   pour   la   gestion   des
+      interruptions, etc...
+%\item \file{init} Le \emph{bootloader} du noyau. Petit morceau de code capable de décompresser le noyau avant de le démarrer (\c{start_kernel}).
+    \end{itemize} 
+  \item Les services supplémentaire du noyau
+    \begin{itemize}
+    \item \file{fs} Les filesystems: ext3, NTFS, NFS, etc...
+    \item \file{net} La gestion  du réseau et plus particulièrement la
+      stack IP
+    \item  \file{ipc}  La  gestion  des  communication  interprocessus
+      (shmem, mq, etc..)
+    \item  \file{security} Les  framework  de gestion  de la  sécurité
+      (selinux, apparmor,  etc..)  \note[item] xen se  trouve lui dans
+      drivers/xen. Consistence?
+    % Seul kvm se trouve dans le mainstream du noyau, mais d'autres existent: xen, vbox, ...
+    \end{itemize} 
+  \item Les drivers
+    \begin{itemize} 
+    \item \file{block} Le framework des périphériques block
+    \item \file{sound} Les drivers de cartes son
+    \item \file{virt/kvm} Le framework de virtualisation kvm.
+    \item  \file{drivers/*} Tous  les autres  drivers et  framework de
+      développements. De loin la plus grosse partie du code du noyau
+    \item \file{firmware}  Certains périphériques nécessitent l'upload
+      d'un firmware  pour s'initialiser. \file{firmware}  contient les
+      binaires de  ces firmware (sans  les sources!). La  politique de
+      Linux  au sujet du  code de  ces firmwares  est qu'il  s'agit de
+      données  d'initialisation  de   ces  périphériques  et  que  par
+      conséquent, ils ont leurs place dans l'arborescence du noyau.
+    \end{itemize} 
+  \item Des bibliothèques utilitaires:
+    \begin{itemize} 
+    \item \file{lib} Divers utilitaires
+    \item   \file{crypto}  Fonctions   utilitaires   relatives  à   la
+      cryptographie
+    \end{itemize} 
+  \item Le code annexe:
+    \begin{itemize} 
+    \item \file{include} Les headers exposés du noyau.
+    \item  \file{scripts} Les  scripts ou  les  programmes utilitaires
+      nécessaires à la compilation ou à l'exploitation du noyau
+    \item \file{usr} Script nécessaire à la génération des initramfs
+    \item  \file{tools}  Les  outils  permettant la  communication  de
+      certains frameworks avec le noyau (particulièrement perf)
+    \end{itemize} 
+  \item La documentation
+    \begin{itemize} 
+    \item \file{Documentation} La documentation
+    \item \file{sample} Des exemples de code pour certains framework
+    \end{itemize} 
+  \end{itemize} 
+\end{frame} 
+% Cohérence: 
+%   sound -> drivers/sound
+%   block -> drivers
+%   virt alors que xen se trouver dans drivers
+%   usr, tools et scripts redondant
+%   Pourquoi Documentation prend un D majuscule?
+
+\begin{frame}[fragile=singleslide]{Les architectures}
+  Regardons \file{arch/} de plus près:
+  \begin{itemize} 
+  \item Les PC: \file{x86}
+  \item Les  workstations et les  serveurs: \file{alpha}, \file{sparc}
+    (Sun),    \file{ia64}    (Intel),   \file{powerpc},    \file{s390}
+    (Mainframes d'IBM) \file{parisc} (Workstation HP)
+  \item     L'embarqué:     \file{arm},     \file{mips},     \file{sh}
+    (STMicroelectronics),   \file{avr32},  \file{m68k},  \file{score},
+    \file{mn10300}, \file{m32r} \file{h8300}
+  \item  Les architectures  dédiées:  \file{cris} (Embedded  Network),
+    \file{frv} (Futjisu, Traitement d'image)
+  \item  Les   DSP:  \file{c6x}  (Texas   Instrument),  \file{heaxgon}
+    (Qualcomm), \file{blackfin}
+  \item Les softcores: \file{microbaze}, \file{xtensa}
+  \item  Les   expérimentaux  \file{tile}  (Architecture  distribuée),
+    \file{unicore32} (Université de Pekin), \file{openrisc}
+  \item User Mode Linux: \file{um}
+  \end{itemize} 
+  On retrouve nos 26 (+1) architectures suportées
+\end{frame}    
+
+\begin{frame}[fragile=singleslide]{Le code spécifiques aux architectures}
+  \begin{itemize} 
+  \item On retrouve dans  les sous-répertoire de \file{arch/} certains
+    répertoires de la racine.
+  \item  \file{mach-}, \file{plat-}, \file{plateforms}  contiennent du
+    code spécifique  à un  type de plateformes:  Ti Omap,  Atmel AT91,
+    PowerPC 85xx
+  \item    On   pourra   trouver    des   fichiers    spécifique   aux
+    \emph{board}.  Particulièrement vrai  pour  les architectures  non
+    plug-and-play qui nécessite  que les périphériques soient déclarés
+    manuellement
+  \item   \file{include/}   contient   des   headers   spécifiques   à
+    l'architecture. Lors  de la  compilation, un lien  symbolique sera
+    créé         entre        \file{arch/<ARCH>/include/asm}        et
+    \file{include/asm}. Ce  lien permet au noyau de  s'abstraire de la
+    plateforme
+  \item \file{boot/}  contient le code  nécessaire au démarrage  de la
+    cible:
+    \begin{itemize}
+    \item  Le  code  du  \emph{bootloader}  et  les  scripts  associés
+      permettant la décompression du noyau en mémoire
+    \item Les scripts nécessaire à la génération d'une image au format
+      du bootloader, du flasher ou de la sonde JTAG
+    \end{itemize} 
+  \end{itemize} 
+\end{frame} 
+
+\section{Compiler le noyau}
+
+  % Les cibles principales
+  %   O=
+  %   V=
+  %   C=
+  %   -j X
+  %   defconfig
+  %   menuconfig/nconfig
+  %   oldconfig
+  %   modules
+  %   modules_install
+  %   *Image
+  %   clean/distclean/mrproper
+% host$ make ARCH=arm CROSS_COMPILE=arm-linux- menuconfig
+
+\subsection{Gerer les configurations}
+\begin{frame}[fragile=singleslide]{Fonctionnement de Kconfig}
+  \begin{itemize}
+  \item Système de compilation du noyau
+  \item Application de la règle: "Pas générique mais simple à hacker"
+  \item Dépend principalement de \cmd{gmake}
+  \item  Pas un  système de  compilation réel. Composé de :
+    \begin{itemize}
+    \item Kconfig, Système de gestion de configuration
+    \item Kmake, règles Makefile bien étudiées
+    \end{itemize}
+  \item   Adapté  aux  environnements   avec  beaucoup   d'options  de
+    configuration
+  \item Très bien adapté à la cross-compilation
+  \item Utilisé dans d'autre projets: uclibc, busybox, buildroot (tous
+    dans le milieu de l'embarqué)
+  \item Pour obtenir de l'aide sur les différentes cibles:
+    \begin{lstlisting}
+host$ make help
+    \end{lstlisting} 
+  \item  La variable  \c{ARCH=}  impacte les  options  du noyau.  Elle
+    spécifie l'architecture à utiliser.  comparez \cmd{make help} avec
+    \cmd{make ARCH=arm help}. 
+  \item   Si   \c{ARCH}   n'est   pas   spécifiée,   Kconfig   utilise
+    l'architecture \emph{host}.
+  \item Lorsque  vous avez commencé  à spécifier \c{ARCH},  vous devez
+    toujours la  spécifier. Il est toutefois possible  de placer cette
+    variable dans l'environnement pour éviter de l'oublier.
+    \begin{lstlisting}
+host$ export ARCH=arm 
+    \end{lstlisting} 
+  \end{itemize} 
+\end{frame} 
+
+  %   defconfig
+  %   oldconfig
+\begin{frame}[fragile=singleslide]{Travailler avec les configurations}
+  \begin{itemize} 
+  \item \c{make  help} propose des configurations  pré-établie. Il est
+    possible d'importer une de ces configuration:
+    \begin{lstlisting} 
+host$ make ARCH=arm usb-a9260_defconfig
+    \end{lstlisting} 
+  \item La configuration est sauvée dans \file{.config}
+  \item Certains  constructeur vous  fournirons un patch  ajoutant une
+    cible \c{_defconfig}
+  \item D'autre vous fournirons un \file{.config}
+  \item  Lorsque  vous   importez  une  fichier  \file{.config}  d'une
+    ancienne version  du noyau ou que  vous changer la  version de vos
+    sources   ou  que  vous   l'éditez  manuellement,   il  recommandé
+    (nécessaire?) de lancer
+    \begin{lstlisting} 
+host$ make oldconfig
+    \end{lstlisting} 
+    \c{oldconfig} vous indique  d'eventuel incompatibilité entre votre
+    configuration et le  code du noyau et vous  demande votre avis sur
+    les nouvelles options
+  \item Il  est possible de  répondre systématiquement par  la réponse
+    par défaut avec
+    \begin{lstlisting} 
+host$ yes "" | make oldconfig
+    \end{lstlisting} 
+  \item Vous pouvez obtenir la liste des nouvelles options par rapport
+    à votre configuration avec
+   \begin{lstlisting} 
+host$ make listnewconfig
+   \end{lstlisting} 
+ \item Pouvez  normalement trouver la configuration du  noyau de votre
+   \emph{host} dans \c{/boot/config-`uname -r`}
+ \item \c{make  savdefconfig} permet de copier  votre configuration en
+   faisant un sanitycheck
+ \end{itemize}
+\end{frame} 
+
+\subsection{Modifier les configurations}
+  %   menuconfig/nconfig
+\begin{frame}[fragile=singleslide]{Configurer le noyau}
+ Pour configurer les options:
+ \begin{itemize}    
+ \item En ligne de commande (inutilisable pour un humain)
+   \begin{lstlisting}
+host$ make config
+   \end{lstlisting} %$
+ \item En ncurses
+   \begin{lstlisting}
+host% apt-get install libncurses5-dev
+host$ make menuconfig
+   \end{lstlisting} %$
+ \item Avec la nouvelle version de ncurses 
+   \begin{lstlisting}
+host% apt-get install libncurses5-dev
+host$ make nconfig
+   \end{lstlisting} %$
+ \item En Qt3
+   \begin{lstlisting}
+host% apt-get install libqt4-dev
+host$ make xconfig
+   \end{lstlisting} %$
+ \item En Gtk
+   \begin{lstlisting}
+host% apt-get install libglade2-dev
+host$ make gconfig
+   \end{lstlisting} %$
+ \item Dans toutes les interfaces,  il est possible d'obtenir de la
+   description sur l'élément sélectionné (\c{<h>} ou \c{<?>})
+ \item  Il est  possible de  rechercher dans  les  descritpions des
+   éléments (\c{</>})
+ \item  Les  script  \cmd{scripts/config}  permet  de  changer  les
+   configuration à la main
+ \end{itemize}
+\end{frame}
+
+\subsection{Compiler}
+\begin{frame}[fragile=singleslide]{Les cibles de compilation}
+  \begin{itemize} 
+  \item  La compilation  du noyau  se lance  juste avec 
+    \begin{lstlisting} 
+host$ make
+    \end{lstlisting} 
+  \item Le  système choisi les  cible appropriée en fonction  de votre
+    architecture (principalement, une image et les modules)
+   \item Il est souvent  préférable (nécessaire?) de spécifier le type
+     d'image voulue avec
+    \begin{lstlisting}
+host$ make XXImage
+    \end{lstlisting}
+  \item \verb+XX+ fait reference au format de la binaire produite:
+    \begin{itemize}
+    \item Le premier octet est-il du code?
+    \item Respecte-t-il le format ELF?
+    \item Y a-t-il un format particulier d'entête à respecter ?
+    \end{itemize}
+  \item Dans  le doute,  il faut consulter  la documentation  de votre
+    bootloader
+  \end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{La compilation}
+  Certaines options peuvent être passées sur la ligne de commande afin
+  de modifier le comportement général du système.
+  \begin{itemize}
+  \item  \c{ARCH=} spécifie l'architecture  à utiliser.  (Nous l'avons
+    déjà vu)
+  \item \c{CROSS_COMPILE=} spécifie le préfixe de la toolchain. Ainsi,
+    si vous  compilez avec \cmd{/opt/arm/usr/bin/arm-linux-ulibc-gcc},
+    vous                        devez                       spécifier:
+    \c{CROSS_COMPILE=/opt/arm/usr/bin/arm-linux-ulibc-}.            Par
+    commodité,  on  préfèrera   ajouter  \cmd{/opt/arm/usr/bin}  à  la
+    variable  d'environement  \cmd{PATH}.  Il  est aussi  possible  de
+    configurer \c{CROSS_COMPILE} par Kconfig
+  \item \c{O=} permet de compiler \emph{out-of-source}:
+    \begin{lstlisting}
+host$ mkdir build
+host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build menuconfig
+    \end{lstlisting} %$
+    Tous  les  fichier  issus  de  la génération  seront  placés  dans
+    \file{build}.  Une fois  que  votre configuration  est crée,  vous
+    pouvez lancer \cmd{make} directement  à partir de \file{build}. La
+    compilation  \emph{out-of-source} permet  une grande  souplesse de
+    développement et est fortement recommandée.
+  \item \c{V=1} permet d'afficher les commandes lancées par le système
+    de build plutôt que la  version abrégée. Pas très lisible lors des
+    compilation parallèle mais indispensable pour comprendre certaines
+    erreur de compilation
+  \item  De  base, le  noyau  n'active  que  les Warning  utiles  (par
+    conséquent,  si un  waring se  produit,  il n'est  surement pas  à
+    ignorer).     \c{W=[123]}    permet    d'activer    des    warning
+    supplémentaires
+  \item  \c{C={1,2}} lance  l'outil  sparse sur  les  sources. Nous  y
+    reviendrons.
+   \item \c{-jX} est une option de \cmd{make}
+  \end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compilation du noyau}
+  Fichiers produits (ou productibles) par la compilation:
+  \begin{itemize}
+  \item  \verb+vmlinux+:  L'image  ELF  du  noyau.   Lisible  par  les
+    debugueurs, certains flasheurs, certain bootloaders
+  \item  \verb+vmlinuz+: parfois  équivalent  du \verb+bzImage+,  mais
+    normalement, il  s'agit de\verb+vmlinux+ compressé  et strippé des
+    informations inutiles  au démarrage. Inutilisable  dans l'état, il
+    est nécéssaire de lui adjoindre un bootloader pour le décompresser
+    et l'éxecuter.
+  \item  \verb+Image+:  \verb+vmlinux+   strippé  et  préfixé  par  un
+    mini-bootloader   permettant    de   sauter   sur    la   fonction
+    \verb+start_kernel+ de \verb+vmlinux+.
+  \item  \verb+bzImage+  et   \verb+zImage+:  \verb+vmlinuz+  avec  le
+    bootloader \cmd{bz2} ou \cmd{gz}.
+  \item  \verb+xipImage+  :  Idem  \verb+Image+ mais  destiné  à  être
+    éxecuté  directement  sur un  \emph{eeprom}  sans  être copier  en
+    mémoire au préalable.
+  \item  \verb+uImage+:  \verb+Image+ avec  une  entête spéciale  pour
+    \emph{u-boot}.
+  \end{itemize}
+  Il est possible  de générer des image au  format SRecord en utiliant
+  \cmd{objcopy}
+  \begin{lstlisting}
+host$ objcopy -O srec vmlinux vmlinux.srec
+  \end{lstlisting}
+\end{frame}
+
+
+\subsection{Compiler les modules}
+  %   modules
+  %   modules_install
+\begin{frame}[fragile=singleslide]{Les modules}
+  Une grosse  partie du  noyau peut être  compilé directement  dans le
+  noyau ou sous forme de modules.
+  \begin{itemize} 
+  \item Ils sont marqués par \c{< >}, \c{<*>} ou \c{<M>}. 
+  \item  Les modules  peuvent être  apparentés à  des plugins  pour le
+    noyau.
+  \item Les modules doivent être présent sur la cible
+  \item   Les  modules   permettent  d'allèger   la  taille   (et  les
+    performences du noyau)
+  \item Les  modules ne peuvent  être chargé qu'àprès le  démarrage du
+    noyau.  Par conséquent, certaines  fonctionnalités ne  peuvent pas
+    être sous forme de modules
+  \item Les  drivers nécessaire au chargements des  modules ne peuvent
+    pas être  des modules. Ainsi, si  vos mdoules sont  sur une flash,
+    tous les drivers nécessaires à  l'accès à cette flash doivent être
+    statiques.
+  \item  Il  est possible  de  développer  des  modules en  dehors  de
+    l'arborescence du noyau.
+  \item \c{make modules} permet de compiler les modules
+  \item   \c{make  INSTALL_MOD_PATH=$(pwd)/../target  modules_install}
+    copie les modules dans  \c{$INSTALL_MOD_PATH} (= dans le rootfs de
+    la cible)
+  \item  \c{make modules_prepare}  prepare  les sources  pour que  les
+    modules extérieur puissent compiler
+  \item   \c{make    INSTALL_PATH=$(pwd)/../target   install}   appelle
+    \c{arch/$ARCH/boot/install.sh} qui appelle \c{\~/bin/installkernel}
+    ou copie le noyau dans \c{$INSTALL_PATH}
+  \item  \c{make  *-pkg}  crée  des  packages  (naifs)  pour  diverses
+    distributions. Ces package contienne le noyau et les modules.
+  \item
+    \c{make   INSTALL_HDR_PATH=$(pwd)/../BSP/include  headers_install}
+    copie  les headers dans  \c{$INSTALL_HDR_PATH}.  Ces  headers sont
+    suffisants    pour   compiler    les   programmes    de   l'espace
+    utilisateur. Si votre toolcahin  est correctemnt compilée, vous ne
+    devriez pas en avoir besoin.
+  \end{itemize}
+\end{frame} 
+
+  %   clean/distclean/mrproper
+\begin{frame}[fragile=singleslide]{Clean}
+  \begin{itemize}
+  \item \c{make clean}  Supprime les fichier objets (qui  ne sont plus
+    utiles une fois le noyau compilé)
+  \item \c{make mrproper} Supprime tous les résulats de la compilation
+    ainsi que les fichier de configuration
+  \item \c{make distclean} Supprime  les résultats de compilation, les
+    configuration et fichier originaires de l'intégration de patchs ou
+    de l'édition de fichiers (\c{*~}, \c{*.orig}, \c{*.rej}, etc...)
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Notre cas}
+  Dans notre cas, nous utilisons U-Boot (standard)
+  \begin{itemize}
+  \item Compilation
+    \begin{lstlisting}
+host% apt-get install uboot-mkimage
+host$ make O=build ARCH=arm usb-a9260_defconfig
+host$ make O=build ARCH=arm CROSS_COMPILE=arm-linux- -j3 uImage
+    \end{lstlisting}
+  \item Partage de l'image par TFTP
+    \begin{lstlisting}
+host% cp build/arch/arm/boot/uImage /srv/tftp/uImage-2.6.33.7
+host% ln -s uImage-2.6.33.7 /srv/tftp/uImage
+    \end{lstlisting} % $ 
+  \item  Au   redémarrage,  le   bootloader  passe  par   un  registre
+    l'identifiant  de   la  carte.   Cet   identifiant  (spécifique  à
+    l'architecture ARM) est erroné. A  ce stade, il est plus facile de
+    corriger   ce   problème   dans   le   noyau   dans   le   fichier
+    \file{arch/arm/tools/mach-types}.
+    \note[item]{C'est mieux de compiler avec -j3}
+    \note[item]{Il faut les laisser démarrer en NFS}
+    \note[item]{Il faut  commenter la ligne  1108 et changer  la ligne
+      1700}
+  \end{itemize}
+\end{frame}
+
+\section{Options à connaitre}
+%-------- 
+ % Les option importantes
+  %   ARCH
+  %   CROSS_COMPILE
+  %   LOCAL_VERSION
+  %   HZ
+  %   SMP
+  %   CMDLINE
+  %   PREEMPT
+  %   HACKING
+  %   XIP
+  %   EMBEDED
+  %   PROCFS
+  %   INITRAMFS
+  %   KVM/XEN/VBOX
+\begin{frame}[fragile=singleslide]{Options à connaitre}
+  \begin{itemize}
+  \item Kernel Compression (Gzip/LZO)
+  \item Support for paging of anonymous memory (swap)
+  \item Kernel .config support
+  \item Kernel log buffer size
+  \item Group CPU scheduler
+  \item Initial RAM filesystem and RAM disk
+  \item Optimize for size
+  \item Configure standard kernel features (for small systems)
+  \item EXecute In Place
+  \end{itemize}
+  \note[item]{TODO P3 faire une liste exaustive}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Compilation du noyau}
+  \begin{itemize}
+  \item Verifier les options du type de processeur
+  \item Cocher NFS
+  \item Le reste ne devrait pas empecher ce demarrer votre cible
+  \end{itemize}  
+\end{frame} 
+%------- 
+
+\section{Options de démarrage}
+  % La commandline
+  % √  init
+  % √  root
+  % √  ip
+  % √  root=/dev/nfs
+  % √  console
+  %   mem
+  %   memmap
+  %   panic
+  %   <module>.<option>
+\begin{frame}[fragile=singleslide]{Passage d'options au noyau}
+  \begin{itemize} 
+  \item Il est possible de passer des options au démarrage du noyau
+  \item C'est  normalement le bootloader  qui se charge de  passer la
+    ligne de commande au noyau
+  \item Le bootloader utilise  un protocole prédéfini (lorsqu'il donne
+    la  main au noyau,  un des  registre contient  un pointeur  sur la
+    ligne de commande)
+  \item Il est possible de surcharger  la ligne de commande lors de la
+    compilation avec l'option \c{CMDLINE}
+  \item   Les   diverses   options   acceptées   sont   décrites   dans
+    \file{Documentation/kernel-parameters.txt}
+  \item  Il est possible  d'accèder à  la ligne  de commande  après le
+    démarrage dans \c{/proc/cmdline}
+  \item Il existe  des paramètres globaux au kernel  et des paramètres
+    spécifiques à  un module.  Lorsque le module  est compilé  dans en
+    statique, il  est possible  de lui passer  des parametres  avec la
+    syntaxe \c{<MODULE_NAME>.<PARAM>=<VALUE>}
+  \item Beaucoup d'options sont modifiable à posteriori par \c{/sys}
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Le rootfs}
+  \begin{itemize}
+  \item \c{root=} indique le disque  à monter sur \c{/}
+  \item Surement l'option la plus utilisée
+  \item  Il est  possible de  spécifier  le nom  d'une partition.  Par
+    exemple  \c{root=/dev/sda1} (PC) ou  \c{root=/dev/mtd0} (partition
+    flash)
+  \item \c{root=/dev/nfs} demande au noyau de démarrer sur NFS
+  \item Remarque:  la partition \c{/}  n'étant pas encore  montée, ces
+    nom  de partition ne  correspondent pas  à des  fichiers existants
+    dans \c{/dev}. Le kernel utilise simplement la même syntaxe.
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Démarrage du noyau}
+  \begin{itemize}
+  \item  A  la fin  du  démarrage  du noyau,  celui  donne  la main  à
+    l'éxecutable déclaré  avec \verb+init=+. Par défaut,  il s'agit de
+    \file{/sbin/init}
+  \item \cmd{init} ne se termine jamais
+  \item  Les  arguments  nons  utilisés  par le  noyau  sont  passé  à
+    \cmd{init}
+  \item On peut  estimer que notre système démarre  à partir du moment
+    ou nous  obtenons un shell (c'est  en tous cas  la que la
+      plupart des intégrateur Linux embarqué s'arreterons)
+  \item Du moins complexe au plus complexe à démarrer:
+  \begin{itemize}
+    \item \verb+init=/hello-arm-static+
+    \item \verb+init=/hello-arm+
+    \item \verb+init=/bin/sh+
+    \item \verb+init=/sbin/init+
+    \end{itemize}
+  \end{itemize}
+  Effectuons ces tests avec le Rootfs original et un Rootfs vierge.
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{La configuration réseau}
+  \begin{itemize}
+  \item Il est posisble d'initialiser le réseau avant de montage du rootfs
+  \item Indispensable pour le démarrage par NFS
+   \item Syntaxe: \c{ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>} 
+   \item Exemple: \c{ip=192.168.1.72:::::eth0:}
+   \item  Pour  le démarrage  par  nfs,  il  est aussi  nécessaire  de
+     spécifier    le    répertoire    partagé    par    le    serveur:
+     \c{nfsroot=192.168.1.10:/srv/nfs}
+   \item Il  aussi possible  de démarrer en  utilisant un DHCP  (ou un
+     autre protocole d'autonégociation): \c{ip=on}
+   \item Il  est alors  possible de spécifier  le \c{nfsroot}  dans la
+     configuration du serveur DHCP:
+     \begin{lstlisting} 
+host target {
+    option root-path "192.168.1.10:/srv/nfs";
+    next-server 192.168.1.10;
+    hardware ethernet 00:26:24:3a:14:5c;
+   fixed-address 192.168.1.72;
+}
+     \end{lstlisting} 
+   \item  Lors du  démarrage  NFS, attention  aux  modifications de  la
+    configuration réseau postérieure au montage du rootfs
+    \item Référence: \file{Documentation/filesystems/nfs/nfsroot.txt}
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{La console}
+  \begin{itemize} 
+    \item Surement la deuxième option la plus utilisée
+    \item  \c{console=}  permet de  demander  au  noyau d'afficher  la
+      sortie de \c{printk} sur un périphérique spécifique.
+    \item Sur PC, souvant limité à \c{console=ttyS0,115200n8}.
+    \item Sur  un système  embarqué, il existe  beaucoup de  driver de
+      ports  séries différents.   \c{console} peut  alors  prendre des
+      valeurs exotiques. A voir au cas par cas pour chaque driver.
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{La mémoire}
+
+\end{frame} 
+
+  % Fabriquer un initramfs
+\section{Initramfs}
+
+\begin{frame}[fragile=singleslide]{Initramfs}
+  \begin{itemize}
+  \item Qu'est-ce qu'un initramfs?
+  \item Un petit filesystème chargé en mémoire par le bootloader
+  \item Successeur de initrd (plus complexe d'utilisation)
+  \item Permet déffectuer des actions avant le lancement d'init
+  \item Il devrait rester petit et ne s'utiliser que pour continuer le
+    boot
+  \item  Si  vous  intégrez  busybox  dans  votre  initramfs,  il  est
+    préconisé  de  le compiler  en  statique  en  ne gardant  que  les
+    composant utiles
+  \item  Cas classique:  charger les  modules permettent  d'acceder au
+    filesystème:
+    \begin{itemize}
+    \item M-Sys Disc-On-Chip
+    \item Configuration RAID
+    \item Configuration réseau pour booter en NFS
+    \end{itemize}
+  \item Dans notre cas, il n'est pas utile car nous n'avons pas besoin
+    de charger de driver particuliers avant le démarrage
+  \end{itemize}
+\end{frame}  
+
+\begin{frame}[fragile=singleslide]{Initramfs}
+  \begin{itemize} 
+  \item Création d'un rootfs vraiment minimal:
+    \begin{lstlisting}
+host$ mkdir initramfs
+host$ cd initramfs
+host$ mkdir dev
+host$ mknod dev/console c 5 1
+host% cp .../hello-arm-static init
+host$ find . |  cpio -o | gzip > initramfs.gz
+    \end{lstlisting}
+  \item Comme l'image noyau, l'image initramfs doit être au format u-boot.
+    \begin{lstlisting} 
+host$ mkimage -A arm -T ramdisk -d initramfs.gz initramfs.gz.img
+host$ cp initramfs.gz.img /srv/tftp
+uboot> tftp 4000000 initramfs.gz.img
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Initramfs}
+  \begin{itemize} 
+  \item  On  indique  l'adresse   du  ramfs  en  second  paramètre  de
+    \cmd{bootm}. Evidement, le noyau doit être configuré pour utiliser
+    le ramfs.
+    \begin{lstlisting} 
+uboot> setenv autostart no
+uboot> tftp 22000000 initramfs.gz.img 
+uboot> tftp 21000000 uImage 
+uboot> bootm 21000000 22000000 
+    \end{lstlisting}
+  \end{itemize}
+  \note[item]{TODO P1 A verifier, tester, completer}
+\end{frame}
+
+
+\begin{frame}[fragile=singleslide]{Etape de fabriquation d'un BSP}
+  \begin{itemize}
+  \item  Commencez par compiler  une toolchain  si celle-ci  n'est pas
+    fournie.
+  \item  Si le  bootloader est  fourni, travaillez  avec  celui-ci. Il
+    arrive souvent que les bootloader initialisent certains paramètres
+    du CPU sans lesquel le kernel ne peut démarrer
+  \item Si  vous n'avez pas  de bootloader, vous devrez  commencez par
+    paramètrer une sonde JTAG
+  \item  Sinon, vous  pouvez développer  le  noyau et  le bootload  en
+    parallèle. Sans  bootloader, vous  devrez utiliser une  sonde JTAG
+    pour démarrer votre cible
+  \item  Configurer   le  noyau  jusqu'à   pouvoir  démarrer  l'espace
+    utilisateur
+  \item Compiler un busybox pour l'espace utilisateur
+  \item Faites fonctionner les différents périphériques
+  \item Intégrer  votre toolchain,  votre bootloader, les  fichiers de
+    configuration de  votre noyau et  de votre busybox, vos  outils et
+    drivers spécifique dans un outil tel que BuildRoot
+  \item Zipper l'ensemble
+  \item Compilez l'ensemble et zipper le résultat
+  \item Intégrez vos modification dans l'upstream
+  \end{itemize}
+\end{frame} 
+
+ % Le répertoire /proc
+
+
+
+ % A couper en deux: une  partie au niveau de "arboresence de sources"
+ % et une partie au niveau de l'API
+\section{Obtenir de la documentation}
+
+  % Documentation
+  % API non stable
+  % generer
+  %    pages de man
+  %    html
+  % sur le web
+  %    kernel/doc
+  %    lxr.linux.no
+  % par mail
+  %   connaitre avoir l'auteur avec AUTOR
+  %   connaitre l'auteur avec git blame
 

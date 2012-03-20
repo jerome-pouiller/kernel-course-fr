@@ -49,10 +49,10 @@
 \PreviewEnvironment{frame}
 
 \usepackage{hyperref} % Doit être chargé avant ntheorem
+\newcommand{\email}[1]{\href{mailto:#1}{\nolinkurl{<#1>}}}
 \newcommand{\file}[1]{\texttt{#1}}
 \newcommand{\cmd}[1]{\texttt{#1}}
-\renewcommand{\c}[1]{\cmd{#1}}
-\newcommand{\email}[1]{\href{mailto:#1}{\nolinkurl{<#1>}}}
+\renewcommand\c[1]{\lstinline[language=c]{#1}}
 
 % \usepackage[]{version} 
 % \usepackage{ntheorem} 
@@ -143,6 +143,9 @@
 }
 
 \hypersetup{colorlinks=true,plainpages=false,urlcolor=blue,linkcolor=}
+
+
+
 
 
 

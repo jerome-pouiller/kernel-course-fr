@@ -1,0 +1,7 @@
+config MY_CONFIG_OPTION
+        tristate "my_module: A small Hello World sample"
+        help
+          Pedagogic purpose only.
+
+          To compile it as a module, choose M here.  If unsure, say N.
+
