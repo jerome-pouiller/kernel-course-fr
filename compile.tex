@@ -44,18 +44,59 @@
   % http
 \begin{frame}[fragile=singleslide]{Récupération des sources}
   Ou récupérer les sources du noyau?
-  \begin{enumerate}
+  \begin{itemize} 
   \item Utiliser les sources souvent  fournies avec ls BSP.  Il arrive
     souvent qu'elles contiennent  des drivers particuliers et qu'elles
     soient déjà configurées
   \item Télecharger sur \file{kernel.org}
     \note[item]{Fonctionne aussi avec 2.6.37}
-    \begin{lstlisting}
+    \begin{lstlisting}[language=sh]
 host$ wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.33.7.tar.bz2
 host$ tar xvjf linux-2.6.33.7.tar.bz2
     \end{lstlisting}
-  \item Utiliser \cmd{git clone}:
-    \note[item] Présenter git
+  \item Utiliser \cmd{git clone}
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Versionning}
+  \begin{itemize}
+  \item Au début, le noyau s'incŕementait de 2 en deux: 2.0, 2.2, 2.4,
+    etc... Les version impaires indiquait les noyau en développement.
+  \item Chaque version du noyau apportait des ruptures importante avec
+    la version précédante
+  \item Avec le noyau 2.5 puis 2.6, le noyau est arrivé à une certaine
+    maturité.   Les  gros   changements  sont   devenu  rare   et  les
+    développement sont devenu de plus en plus itératifs
+  \item Finalement  dans la version 2.6, toutes  les versions mineures
+    sont stables
+  \item Les version  stable de la 2.6 peuvent  recevoir des correctifs
+    et sont alors numérotés sur 4 chiffres
+  \item Le  noyau 2.6 fonctionne  par intégration de  patchs provenant
+    des sous-système  les noyau produit  lors de l'intégration  de ses
+    patchs est suffixé par \texttt{rcX} (release candidate).
+  \item Le noyau  alterne les fenêtres de merge  pendant lesquels, les
+    mainteneurs des sous-système  envoient leur développements à Linus
+    Tovalds et fenêtre de stabilisation.
+  \item La version 3.0 est fait la version 2.6.40 renommé:
+    \begin{itemize}
+    \item Pour fêter les 20ans du kernel
+    \item Il n'y a eu aucune refonte entre les version 2.6 et 3
+    \item Pour marquer l'intégration  de la branche RT-Preempt dans le
+      mainstream
+    \item  Parce  qu'avaec  le  cycle de  développement  itératif,  la
+      version 2.6 ne s'incrémentera jamais. Les version stable quant à
+      elles  peuvent recevoir  des  correctif et  se  retourver sur  4
+      chiffres.  Il y  avait par  conséquent un  chiffres en  trop. Le
+      passage en 3.Y.Z permettait de revenir sur un modèle classique à
+      3 chiffres.
+    \item Le passage en 3.X  marque aussi la stabilisation du cycle de
+      développement du noyau
+    \end{itemize} 
+  \item Référence : \file{Documentation/development-process}
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Git}
     \begin{itemize} 
     \item \cmd{git} est l'outil de gestion de source du noyau
     \item  Il est fortement  recommander de  l'utiliser dans  le cadre
@@ -117,7 +158,6 @@ host$ git checkout v2.6.38
 host$ git checkout -b mybranch v2.6.38
       \end{lstlisting}
     \end{itemize}  
-  \end{enumerate}
 \end{frame}
 
 \section{Organisation des sources}
@@ -291,6 +331,11 @@ $ du -s */ | sort -n | column
   \item Très bien adapté à la cross-compilation
   \item Utilisé dans d'autre projets: uclibc, busybox, buildroot (tous
     dans le milieu de l'embarqué)
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Le système de compilation}
+\begin{itemize} 
   \item Pour obtenir de l'aide sur les différentes cibles:
     \begin{lstlisting}
 host$ make help
@@ -318,10 +363,21 @@ host$ export ARCH=arm
     \begin{lstlisting} 
 host$ make ARCH=arm usb-a9260_defconfig
     \end{lstlisting} 
-  \item La configuration est sauvée dans \file{.config}
+  \item Kconfig sauvegarde la configuration dans \file{.config}. 
+  \item Le fichier \file{.config} sera ensuite:
+    \begin{itemize} 
+    \item Sourcé dans les système de Makefile
+    \item Transformé  en \file{include/generated/autoconf.h} et inclut
+      dans les headers de compilations
+    \end{itemize} 
   \item Certains  constructeur vous  fournirons un patch  ajoutant une
     cible \c{_defconfig}
   \item D'autre vous fournirons un \file{.config}
+\end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Travailler avec les configurations}
+\begin{itemize} 
   \item  Lorsque  vous   importez  une  fichier  \file{.config}  d'une
     ancienne version  du noyau ou que  vous changer la  version de vos
     sources   ou  que  vous   l'éditez  manuellement,   il  recommandé
@@ -344,7 +400,7 @@ host$ make listnewconfig
    \end{lstlisting} 
  \item Pouvez  normalement trouver la configuration du  noyau de votre
    \emph{host} dans \c{/boot/config-`uname -r`}
- \item \c{make  savdefconfig} permet de copier  votre configuration en
+ \item \c{make  savedefconfig} permet de copier  votre configuration en
    faisant un sanitycheck
  \end{itemize}
 \end{frame} 
@@ -368,7 +424,12 @@ host$ make menuconfig
 host% apt-get install libncurses5-dev
 host$ make nconfig
    \end{lstlisting} %$
- \item En Qt3
+\end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Configurer le noyau}
+\begin{itemize} 
+ \item En Qt4
    \begin{lstlisting}
 host% apt-get install libqt4-dev
 host$ make xconfig
@@ -412,7 +473,7 @@ host$ make XXImage
   \end{itemize}
 \end{frame} 
 
-\begin{frame}[fragile=singleslide]{La compilation}
+\begin{frame}[fragile=singleslide]{Options de Kmake}
   Certaines options peuvent être passées sur la ligne de commande afin
   de modifier le comportement général du système.
   \begin{itemize}
@@ -425,6 +486,19 @@ host$ make XXImage
     commodité,  on  préfèrera   ajouter  \cmd{/opt/arm/usr/bin}  à  la
     variable  d'environement  \cmd{PATH}.  Il  est aussi  possible  de
     configurer \c{CROSS_COMPILE} par Kconfig
+  \item \c{V=1} permet d'afficher les commandes lancées par le système
+    de build plutôt que la  version abrégée. Pas très lisible lors des
+    compilation parallèle mais indispensable pour comprendre certaines
+    erreur de compilation
+  \item  De  base, le  noyau  n'active  que  les Warning  utiles  (par
+    conséquent,  si un  waring se  produit,  il n'est  surement pas  à
+    ignorer).     \c{W=[123]}    permet    d'activer    des    warning
+    supplémentaires
+\end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Options de Kmake}
+\begin{itemize} 
   \item \c{O=} permet de compiler \emph{out-of-source}:
     \begin{lstlisting}
 host$ mkdir build
@@ -435,14 +509,6 @@ host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build menuconfig
     pouvez lancer \cmd{make} directement  à partir de \file{build}. La
     compilation  \emph{out-of-source} permet  une grande  souplesse de
     développement et est fortement recommandée.
-  \item \c{V=1} permet d'afficher les commandes lancées par le système
-    de build plutôt que la  version abrégée. Pas très lisible lors des
-    compilation parallèle mais indispensable pour comprendre certaines
-    erreur de compilation
-  \item  De  base, le  noyau  n'active  que  les Warning  utiles  (par
-    conséquent,  si un  waring se  produit,  il n'est  surement pas  à
-    ignorer).     \c{W=[123]}    permet    d'activer    des    warning
-    supplémentaires
   \item  \c{C={1,2}} lance  l'outil  sparse sur  les  sources. Nous  y
     reviendrons.
    \item \c{-jX} est une option de \cmd{make}
@@ -470,13 +536,15 @@ host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build menuconfig
   \item  \verb+uImage+:  \verb+Image+ avec  une  entête spéciale  pour
     \emph{u-boot}.
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Le format S3}
   Il est possible  de générer des image au  format SRecord en utiliant
   \cmd{objcopy}
   \begin{lstlisting}
 host$ objcopy -O srec vmlinux vmlinux.srec
   \end{lstlisting}
 \end{frame}
-
 
 \subsection{Compiler les modules}
   %   modules
@@ -500,6 +568,11 @@ host$ objcopy -O srec vmlinux vmlinux.srec
     statiques.
   \item  Il  est possible  de  développer  des  modules en  dehors  de
     l'arborescence du noyau.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Les modules}
+  \begin{itemize} 
   \item \c{make modules} permet de compiler les modules
   \item   \c{make  INSTALL_MOD_PATH=$(pwd)/../target  modules_install}
     copie les modules dans  \c{$INSTALL_MOD_PATH} (= dans le rootfs de
@@ -606,10 +679,8 @@ host% ln -s uImage-2.6.33.7 /srv/tftp/uImage
   % √  ip
   % √  root=/dev/nfs
   % √  console
-  %   mem
-  %   memmap
   %   panic
-  %   <module>.<option>
+  % √  <module>.<option>
 \begin{frame}[fragile=singleslide]{Passage d'options au noyau}
   \begin{itemize} 
   \item Il est possible de passer des options au démarrage du noyau
@@ -672,15 +743,20 @@ host% ln -s uImage-2.6.33.7 /srv/tftp/uImage
   \begin{itemize}
   \item Il est posisble d'initialiser le réseau avant de montage du rootfs
   \item Indispensable pour le démarrage par NFS
-   \item Syntaxe: \c{ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>} 
-   \item Exemple: \c{ip=192.168.1.72:::::eth0:}
-   \item  Pour  le démarrage  par  nfs,  il  est aussi  nécessaire  de
-     spécifier    le    répertoire    partagé    par    le    serveur:
-     \c{nfsroot=192.168.1.10:/srv/nfs}
-   \item Il  aussi possible  de démarrer en  utilisant un DHCP  (ou un
-     autre protocole d'autonégociation): \c{ip=on}
-   \item Il  est alors  possible de spécifier  le \c{nfsroot}  dans la
-     configuration du serveur DHCP:
+  \item Syntaxe: \c{ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>} 
+  \item Exemple: \c{ip=192.168.1.72:::::eth0:}
+  \item  Pour  le  démarrage  par  nfs, il  est  aussi  nécessaire  de
+    spécifier    le    répertoire     partagé    par    le    serveur:
+    \c{nfsroot=192.168.1.10:/srv/nfs}
+  \item  Il aussi possible  de démarrer  en utilisant  un DHCP  (ou un
+    autre protocole d'autonégociation): \c{ip=on}
+  \end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{La configuration réseau}
+  \begin{itemize} 
+  \item  Il est  alors possible  de spécifier  le \c{nfsroot}  dans la
+    configuration du serveur DHCP:
      \begin{lstlisting} 
 host target {
     option root-path "192.168.1.10:/srv/nfs";
@@ -689,8 +765,8 @@ host target {
    fixed-address 192.168.1.72;
 }
      \end{lstlisting} 
-   \item  Lors du  démarrage  NFS, attention  aux  modifications de  la
-    configuration réseau postérieure au montage du rootfs
+   \item  Lors du  démarrage NFS,  attention aux  modifications  de la
+     configuration réseau postérieure au montage du rootfs
     \item Référence: \file{Documentation/filesystems/nfs/nfsroot.txt}
   \end{itemize} 
 \end{frame} 
@@ -707,8 +783,10 @@ host target {
   \end{itemize} 
 \end{frame} 
 
+  %   mem
+  %   memmap
 \begin{frame}[fragile=singleslide]{La mémoire}
-
+% TODO
 \end{frame} 
 
   % Fabriquer un initramfs
@@ -740,7 +818,7 @@ host target {
 \begin{frame}[fragile=singleslide]{Initramfs}
   \begin{itemize} 
   \item Création d'un rootfs vraiment minimal:
-    \begin{lstlisting}
+    \begin{lstlisting}[language=sh]
 host$ mkdir initramfs
 host$ cd initramfs
 host$ mkdir dev
@@ -801,20 +879,4 @@ uboot> bootm 21000000 22000000
  % Le répertoire /proc
 
 
-
- % A couper en deux: une  partie au niveau de "arboresence de sources"
- % et une partie au niveau de l'API
-\section{Obtenir de la documentation}
-
-  % Documentation
-  % API non stable
-  % generer
-  %    pages de man
-  %    html
-  % sur le web
-  %    kernel/doc
-  %    lxr.linux.no
-  % par mail
-  %   connaitre avoir l'auteur avec AUTOR
-  %   connaitre l'auteur avec git blame
 

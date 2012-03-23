@@ -11,11 +11,228 @@
 
 \part{Debuguer}
 
+\section{Afficher des informations}
   % printk / pr_*
   % debugfs
   % dprintk
+% TODO: Placer ca avant
+% et placer le debug à la fin
+\begin{frame}[fragile=singleslide]{Debugguer}
+  \begin{itemize} 
+  \item \c{printk} affiche les information sur la console et les copie
+    dans  un  buffer.  Il  est  possible  d'afficher  ce  buffer  avec
+    \cmd{dmesg}
+  \item   Il  est  possible   d'utiliser  directemenr   \c{printk}  en
+    specifiant le degré d'importance de l'information:
+    \begin{lstlisting} 
+printk(KERN_ALERT "Aie\n");
+    \end{lstlisting} 
+  \item Notez l'absence de virgule entre \c{KERN_ALERT} et la chaîne
+  \item Néanmoins,  il est maintenant conseillé  d'utiliser les macros
+    \c{pr_cont}, \c{pr_devel}\c{pr_debug}, \c{pr_info}, \c{pr_notice},
+    \c{pr_warning},     \c{pr_err},     \c{pr_crit},     \c{pr_alert},
+    \c{pr_emerg}
+  \item Existe aussi  suffixé de \c{_once} pour n'être  affiché que la
+    première fois.
+  \item  \c{print_hex_dump_bytes} et  \c{print_hex_dump}  affichent un
+    dump en hexadécimal d'un buffer.  La seconde est la forme générale
+    qui  permet de  faire à  peu près  la même  chose que  la commande
+    \c{hexdump}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{\c{printk}}
+  \begin{itemize} 
+  \item  \c{printk} est  compatible avec  la norme  C99 et  ajoute des
+   extentions  pour  pretty-pinter  certains pointeurs  (\c{\%p}).  En
+   particulier:
+     \begin{itemize}
+    \item \c{\%pF}  pour résoudre le  nom d'une fonction du  segment de
+      text
+    \item \c{\%pUB} et \c{\%pUL} pour afficher les UUID ou les GUID
+    \item \c{\%pM} pour afficher des addresses MAC
+    \item \c{\%pI4} pour affichier des addresses IPv4
+    \item \c{\%pI6} et \c{\%pI6c} pour affichier des addresses IPv6
+    \item Les  formats d'IP peuvent être suivit  de h, n, l  ou b pour
+      demander des conversions d'endian avant d'afficher
+    \item \c{\%m} pour \c{errno}
+    \end{itemize} 
+  \item                Référence                \file{linux/printk.h},
+    \file{Documentation/printk-formats.txt}
+  \item Il  est aussi possible de  provoquer des dump de  la pile avec
+    les macro \c{BUG()}, \c{BUG_ON(condition)} et \c{BUG_ON_NULL(ptr)}
+  \item  Les \c{pr_debug}  ne sont  compilé  que si  l'une des  option
+    \c{CONFIG_DEBUG} ou \c{CONFIG_DYNAMIC_DEBUG} est active
+  \item Dans  le cas de  \c{DYNAMIC_DEBUG}, il est  possible d'activer
+    les messages namiquement en passant par debugfs
+  \item Référence: \file{Documentation/dynamic-debug-howto.txt}
+  \end{itemize} 
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{debugfs}
+\begin{itemize} 
+\item Un certain nom d'outils de debug sont commandé par debugfs
+\item Il s'agit d'un type de partition virtuel
+\item Activé avec 
+\begin{lstlisting} 
+mount -t debugfs none /sys/kernel/debug
+\end{lstlisting} 
+\item Il est possible d'obtenir le status de dprintk avec 
+\begin{lstlisting} 
+ cat /sys/kernel/debug/dynamic_debug/control
+\end{lstlisting} 
+\item ... et d'activer de nouvelles traces avec 
+ \begin{lstlisting} 
+echo 'file hello.c +plf' >  /sys/kernel/debug/dynamic_debug/control
+\end{lstlisting} 
+\end{itemize} 
+\end{frame} 
+
+%% TODO parler ici des sysrq. Reprendre le docbook de kgdb et de freeelectron
+
   % kgdb
+\begin{frame}[fragile=singleslide]{Debuguer le noyau}
+  Activiation d \cmd{kgdb} permettant d'embarquer \cmd{gdbserver} dans
+  le noyau:
+  \begin{itemize}
+  \item Compilation
+    \begin{lstlisting}
+host$ cp -a build build-dbg
+host$ make O=build-dbg ARCH=arm CROSS_COMPILE=arm-linux- menuconfig
+... Compile the kernel with debug info ...
+... KGDB: kernel debugging with remote gdb ...
+host$ make -j3 O=build-dbg ARCH=arm CROSS_COMPILE=arm-linux- uImage
+    \end{lstlisting} 
+  \item L'image ELF est beaucoup plus grosse
+    \begin{lstlisting}
+host$ ls -l build-dbg/vmlinux build/vmlinux
+host$ cp build-dbg/uImage /srv/tftp/uImage-2.6.33.7-dbg
+    \end{lstlisting} 
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile=singleslide]{Debuguer le noyau}
+  \begin{itemize}
+  \item  Passage des arguments  \cmd{kgdboc} indiquant  quel interface
+    \cmd{kgdb} doit utilisé et  \cmd{kgdbwait} indiquant que kgdb doit
+    attendre notre connexion avant de continuer le boot
+    \begin{lstlisting}
+uboot> set bootargs ${bootargs} kgdboc=ttyS0 kgdbwait
+uboot> tftp
+<Ctrl-a q>
+host$ arm-linux-gdb vmlinux 
+gdb> target remote /dev/ttyUSB1
+    \end{lstlisting} 
+    \item Référence: \file{htmldocs/kgdb.html}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Debuguer le noyau}
+  Nécessite  une modification  du driver  \file{atmel\_serial}  afin de
+  permettre   l'utilisation  de   son  port   serie   par  \cmd{kgdb}.
+  Modification  apportée par  Albin Tonerre  backportée de  la version
+  2.6.34 du noyau (nous y reviendrons):
+  \begin{lstlisting}
+host$ patch -p1 < 0001-serial-atmel_serial-add-poll_get_char-and-poll_put_c.patch 
+  \end{lstlisting} 
+
+\note[item]{testé avec la version 2.6.37, mais devait fonctionner comme ca}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+  Gestion de l'éxecution
+  \begin{itemize}
+  \item Point d'arrêt à l'adresse \verb+0x9876+
+    \begin{lstlisting}
+gdb> b *0x9876
+    \end{lstlisting}
+  \item \verb+b  hello.c:30+ Point  d'arrêt à la  ligne 30  du fichier
+    \file{hello.c}
+    \begin{lstlisting}
+gdb> b hello.c:30
+    \end{lstlisting}
+  \item Point d'arrêt sur la fonction \cmd{main}
+    \begin{lstlisting}
+gdb> b main
+    \end{lstlisting}
+  \item Continuer un programme arrêté
+    \begin{lstlisting}
+gdb> c
+    \end{lstlisting}
+  \item Démarrer le programme avec \verb+arg+ comme argument
+    \begin{lstlisting}
+gdb> r arg
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+  
+\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+  Obtenir des informations
+  \begin{itemize}
+  \item Voir la pile d'appel
+    \begin{lstlisting}
+gdb> bt
+    \end{lstlisting}
+  \item Afficher les variable locales à la fonction
+    \begin{lstlisting}
+gdb> i locales
+    \end{lstlisting}
+  \item Afficher les arguments de la fonction
+    \begin{lstlisting}
+gdb> i args
+    \end{lstlisting}
+  \item Afficher la valeur de \verb+a+
+    \begin{lstlisting}
+gdb> p a
+    \end{lstlisting}
+  \item Afficher la valeur de \verb+abs(2 * (a - 4))+
+    \begin{lstlisting}
+gdb> p abs(2 * (a -  4))
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+  Debuguer à chaud
+  \begin{itemize}
+  \item Attacher \verb+gdb+ à un processus existant
+    \begin{lstlisting}
+gdb> attach 1234
+    \end{lstlisting}
+  \item Arrêter le debug sans arrêter le processus
+    \begin{lstlisting}
+gdb> detach
+     \end{lstlisting}
+   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+  Et plus...
+  \begin{itemize}
+  \item Afficher  la valeur de \verb+i+  à chaque fois  que l'on passe
+    sur le point d'arrêt 1
+    \begin{lstlisting}
+gdb> command 1
+> silent
+> p i
+> c
+> end
+    \end{lstlisting}
+  \item Arrêter le programme lorsque la variable \verb+i+ est modifiée
+    ou lue
+    \begin{lstlisting}
+gdb> watch i
+gdb> awatch i
+      \end{lstlisting}
+    \item Passer d'une thread à une autre
+      \begin{lstlisting}
+gdb> thread 2
+gdb> thread 1
+      \end{lstlisting}
+    \end{itemize}
+\end{frame}
+
   % kdb
+  % Les magic keys
   % Le soption de debug de HACKING
   % Les autres: systemtap, lttng , ftrace, kernel_probe
 
