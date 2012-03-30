@@ -51,8 +51,8 @@
   \item Télecharger sur \file{kernel.org}
     \note[item]{Fonctionne aussi avec 2.6.37}
     \begin{lstlisting}[language=sh]
-host$ wget http://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.33.7.tar.bz2
-host$ tar xvjf linux-2.6.33.7.tar.bz2
+host$ wget http://www.kernel.org/pub/linux/kernel/v3.x/linux-3.3.tar.bz2
+host$ tar xvjf linux-3.3.tar.bz2
     \end{lstlisting}
   \item Utiliser \cmd{git clone}
   \end{itemize} 
@@ -97,51 +97,60 @@ host$ tar xvjf linux-2.6.33.7.tar.bz2
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Git}
+  \begin{itemize} 
+  \item \cmd{git} est l'outil de gestion de source du noyau
+  \item  Il est fortement  recommander de  l'utiliser dans  le cadre
+    d'un développement du noyau
+  \item Il s'agit d'un système de gestion décentralisé. 
+  \item Pour expliquer la décentralisation, imaginez que
     \begin{itemize} 
-    \item \cmd{git} est l'outil de gestion de source du noyau
-    \item  Il est fortement  recommander de  l'utiliser dans  le cadre
-      d'un développement du noyau
-    \item Il s'agit d'un système de gestion décentralisé. 
-    \item Pour expliquer la décentralisation, imaginez que
-      \begin{itemize} 
-      \item vous dupliquez un dépôt svn
-      \item vous faites des modifications sur les deux dépôts
-      \item vous essayez de resynchronisez les deux...
-      \item  Considérez git  comme  un svn  capable d'effectuer  cette
-        opération très simplement.
-      \item Lorsque  vous récupérez le  code d'un dépôt,  vous devenez
-        vous même dépôt
-      \item Si vous  laissez un moyen quelconque d'accès  en lecture à
-        votre dépôt, d'autres personne  pourrons à leur tour le cloner
-        ou tirer les modification que vous avez effectuez
-      \end{itemize} 
-    \item \url{http://git.kernel.org}  liste les dépôts  publiques des
-      principaux développeurs du noyau
-    \item Pour récupérer un dépôt:
-      \begin{lstlisting} 
+    \item vous dupliquez un dépôt svn
+    \item vous faites des modifications sur les deux dépôts
+    \item vous essayez de resynchronisez les deux...
+    \item  Considérez  git  comme  un svn  capable  d'effectuer  cette
+      opération très simplement.
+    \item Lorsque vous récupérez le code d'un dépôt, vous devenez vous
+      même dépôt
+    \item Si  vous laissez  un moyen quelconque  d'accès en  lecture à
+      votre dépôt, d'autres personne pourrons à leur tour le cloner ou
+      tirer les modification que vous avez effectuez
+    \end{itemize} 
+  \item  \url{http://git.kernel.org} liste  les  dépôts publiques  des
+    principaux développeurs du noyau
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Git}
+  \begin{itemize} 
+  \item Pour récupérer un dépôt:
+    \begin{lstlisting} 
 git clone <depôt>
-      \end{lstlisting} 
-    \item Remarquons en particulier:
-      \begin{itemize} 
-      \item
-        \url{git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git}
-        Le dépôt de Linus Torvalds. Il contient les derniers patchs du
-        noyau en dévelopement
-      \item
-        \url{git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git}
-        Le dépot stable. Contient la dernière version stable du noyau,
-        ainsi les les patches des version stables.
-      \item
-        \url{git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git}
-        Les dépôt  une dizaine  de sous-projets importants  sont mergé
-        automatiquement dans ce  dépôt. Utilisé principalement par des
-        robots afin d'identitifier les  problème de merge en amont des
-        ohases d'intégrations
-      \item
-        \url{git://git.kernel.org/pub/scm/linux/kernel/git/tglx/history.git}
-        L'historique des versions entre 2.5.0 et 2.6.12.
-      \end{itemize} 
-      \begin{lstlisting} 
+    \end{lstlisting} 
+  \item Remarquons en particulier:
+    \begin{itemize} 
+    \item
+      \url{git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git}
+      Le dépôt de  Linus Torvalds. Il contient les  derniers patchs du
+      noyau en dévelopement
+    \item
+      \url{git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git}
+      Le dépot  stable. Contient la dernière version  stable du noyau,
+      ainsi les les patches des version stables.
+    \item
+      \url{git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git}
+      Les  dépôt une  dizaine  de sous-projets  importants sont  mergé
+      automatiquement dans  ce dépôt.  Utilisé  principalement par des
+      robots afin  d'identitifier les problème  de merge en  amont des
+      ohases d'intégrations
+    \item
+      \url{git://git.kernel.org/pub/scm/linux/kernel/git/tglx/history.git}
+      L'historique des versions entre 2.5.0 et 2.6.12.
+    \end{itemize} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Git}
+  \begin{lstlisting} 
 host$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
       \end{lstlisting} 
       Chaque version du noyau est marquée avec un tag
@@ -150,14 +159,13 @@ host$ git tag
       \end{lstlisting} 
       Puis il est possible de réucpérer une version avec
       \begin{lstlisting}
-host$ git checkout v2.6.38
+host$ git checkout v3.3
       \end{lstlisting}
       Votre  dépôt  est alors  non-modifiable.  Vous  devez créer  une
       branche de travail:
       \begin{lstlisting}
-host$ git checkout -b mybranch v2.6.38
+host$ git checkout -b mybranch v3.3
       \end{lstlisting}
-    \end{itemize}  
 \end{frame}
 
 \section{Organisation des sources}
@@ -179,6 +187,9 @@ $ du -s */ | sort -n | column
 2400    mm               252688  drivers
 3536    tools
   \end{lstlisting} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Organisation des sources}
   \begin{itemize} 
   \item Les services indispensable à un OS:
     \begin{itemize} 
@@ -193,9 +204,14 @@ $ du -s */ | sort -n | column
       particulier,  le code nécessaire  au boot,  à la  génération des
       images,   les   routine   assembleur   pour   la   gestion   des
       interruptions, etc...
-%\item \file{init} Le \emph{bootloader} du noyau. Petit morceau de code capable de décompresser le noyau avant de le démarrer (\c{start_kernel}).
+      % \item \file{init} Le \emph{bootloader} du noyau. Petit morceau
+      %   de  code  capable  de  décompresser  le noyau  avant  de  le
+      %   démarrer (\c{start_kernel}).
+    \item  On peut  estimer que  l'intelligence  réside principalement
+      dans \file{kernel}  et \file{mm}.  On remarque cette  partie est
+      finalement relativement petite dans le noyau.
     \end{itemize} 
-  \item Les services supplémentaire du noyau
+  \item Les services supplémentaire du noyau:
     \begin{itemize}
     \item \file{fs} Les filesystems: ext3, NTFS, NFS, etc...
     \item \file{net} La gestion  du réseau et plus particulièrement la
@@ -207,13 +223,17 @@ $ du -s */ | sort -n | column
       drivers/xen. Consistence?
     % Seul kvm se trouve dans le mainstream du noyau, mais d'autres existent: xen, vbox, ...
     \end{itemize} 
+  \end{itemize}  
+\end{frame}
+\begin{frame}[fragile=singleslide]{Organisation des sources}
+  \begin{itemize} 
   \item Les drivers
     \begin{itemize} 
-    \item \file{block} Le framework des périphériques block
-    \item \file{sound} Les drivers de cartes son
+    \item \file{block} Le framework des périphériques block.
+    \item \file{sound} Les drivers de cartes son.
     \item \file{virt/kvm} Le framework de virtualisation kvm.
     \item  \file{drivers/*} Tous  les autres  drivers et  framework de
-      développements. De loin la plus grosse partie du code du noyau
+      développements. De loin la plus grosse partie du code du noyau.
     \item \file{firmware}  Certains périphériques nécessitent l'upload
       d'un firmware  pour s'initialiser. \file{firmware}  contient les
       binaires de  ces firmware (sans  les sources!). La  politique de
@@ -227,6 +247,11 @@ $ du -s */ | sort -n | column
     \item   \file{crypto}  Fonctions   utilitaires   relatives  à   la
       cryptographie
     \end{itemize} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Organisation des sources}
+  \begin{itemize} 
   \item Le code annexe:
     \begin{itemize} 
     \item \file{include} Les headers exposés du noyau.
@@ -329,7 +354,7 @@ $ du -s */ | sort -n | column
   \item   Adapté  aux  environnements   avec  beaucoup   d'options  de
     configuration
   \item Très bien adapté à la cross-compilation
-  \item Utilisé dans d'autre projets: uclibc, busybox, buildroot (tous
+  \item Utilisé dans d'autre projets: µclibc, busybox, buildroot (tous
     dans le milieu de l'embarqué)
 \end{itemize}
 \end{frame} 
@@ -346,8 +371,9 @@ host$ make help
   \item   Si   \c{ARCH}   n'est   pas   spécifiée,   Kconfig   utilise
     l'architecture \emph{host}.
   \item Lorsque  vous avez commencé  à spécifier \c{ARCH},  vous devez
-    toujours la  spécifier. Il est toutefois possible  de placer cette
-    variable dans l'environnement pour éviter de l'oublier.
+    toujours la  spécifier. 
+  \item Il  est toutefois  possible de placer  cette variable  dans le
+    Makefile racine ou dans l'environnement pour éviter de l'oublier.
     \begin{lstlisting}
 host$ export ARCH=arm 
     \end{lstlisting} 
@@ -398,8 +424,8 @@ host$ yes "" | make oldconfig
    \begin{lstlisting} 
 host$ make listnewconfig
    \end{lstlisting} 
- \item Pouvez  normalement trouver la configuration du  noyau de votre
-   \emph{host} dans \c{/boot/config-`uname -r`}
+ \item Vous  pouvez normalement trouver  la configuration du  noyau de
+   votre \emph{host} dans \c{/boot/config-`uname -r`}
  \item \c{make  savedefconfig} permet de copier  votre configuration en
    faisant un sanitycheck
  \end{itemize}
@@ -439,11 +465,13 @@ host$ make xconfig
 host% apt-get install libglade2-dev
 host$ make gconfig
    \end{lstlisting} %$
- \item Dans toutes les interfaces,  il est possible d'obtenir de la
+ \item Dans  toutes les  interfaces, il est  possible d'obtenir  de la
    description sur l'élément sélectionné (\c{<h>} ou \c{<?>})
- \item  Il est  possible de  rechercher dans  les  descritpions des
+ \item  Il  est  possible  de  rechercher dans  les  descritpions  des
    éléments (\c{</>})
- \item  Les  script  \cmd{scripts/config}  permet  de  changer  les
+ \item  Dans   la  recherche  et  dans  l'aide,   vous  trouverez  des
+   informations sur les dépendances entre les options
+ \item   Les  script  \cmd{scripts/config}   permet  de   changer  les
    configuration à la main
  \end{itemize}
 \end{frame}
@@ -499,6 +527,11 @@ host$ make XXImage
 
 \begin{frame}[fragile=singleslide]{Options de Kmake}
 \begin{itemize} 
+  \item  \c{C={1,2}} lance  l'outil  sparse sur  les  sources. Nous  y
+    reviendrons.
+  \item  \c{-jX} est  une option  de \cmd{make}  qui permet  de lancer
+    \c{X}  compilation simultanées.  Grosso modo,  \c{X}  devrait être
+    plus ou moins votre nombre de coeurs CPU.
   \item \c{O=} permet de compiler \emph{out-of-source}:
     \begin{lstlisting}
 host$ mkdir build
@@ -509,9 +542,6 @@ host$ make ARCH=arm CROSS_COMPILE=arm-linux- O=build menuconfig
     pouvez lancer \cmd{make} directement  à partir de \file{build}. La
     compilation  \emph{out-of-source} permet  une grande  souplesse de
     développement et est fortement recommandée.
-  \item  \c{C={1,2}} lance  l'outil  sparse sur  les  sources. Nous  y
-    reviendrons.
-   \item \c{-jX} est une option de \cmd{make}
   \end{itemize} 
 \end{frame}
 
@@ -553,12 +583,13 @@ host$ objcopy -O srec vmlinux vmlinux.srec
   Une grosse  partie du  noyau peut être  compilé directement  dans le
   noyau ou sous forme de modules.
   \begin{itemize} 
-  \item Ils sont marqués par \c{< >}, \c{<*>} ou \c{<M>}. 
+  \item Ils sont marqués par  \c{< >} (non-compilé), \c{<*>} (linké en
+    statique) ou \c{<M>} (compilé en module).
   \item  Les modules  peuvent être  apparentés à  des plugins  pour le
-    noyau.
+    noyau. Il peuvent être chargé et déchargés dynamiquement.
   \item Les modules doivent être présent sur la cible
-  \item   Les  modules   permettent  d'allèger   la  taille   (et  les
-    performences du noyau)
+  \item Les  modules permettent d'allèger la taille  (et améliorer les
+    performances) du noyau
   \item Les  modules ne peuvent  être chargé qu'àprès le  démarrage du
     noyau.  Par conséquent, certaines  fonctionnalités ne  peuvent pas
     être sous forme de modules
@@ -606,6 +637,186 @@ host$ objcopy -O srec vmlinux vmlinux.srec
   \end{itemize} 
 \end{frame} 
 
+\section{Options principales}
+\begin{frame}[fragile=singleslide]{Configuration globale}
+  \begin{itemize} 
+  \item \emph{General setup}
+    \begin{itemize} 
+    \item  \c{EXPERIMENTAL} débloque les  options de  compilation pour
+      les drivers/option instables (staging, etc...)
+    \item \c{CROSS_COMPILE} Affecte la variable \c{CROSS_COMPILE}
+    \item    \c{LOCALVERSION}    Ajoute    un   identifiant    à    la
+      version. Indispensable dans les phases d'intégration. La version
+      peut  être lue  avce \c{uname  -r}. ITEM  est aussi  possible de
+      faire \c{make  kernelrelease} dans un  répertoire de compilation
+      du noyau.
+    \item  \c{LOCALVERSION_AUTO}   Ajouter  l'identifiant  git   à  la
+      version. Indispensable dans les phases de développement
+    \item   \c{KERNEL_GZIP}:   Permet    de   choisir   le   type   de
+      compression.  Chaque  algorithme  a  ces  inconvénients  et  ses
+      intérêts. 
+% (cf. \url{http://free-electrons.com/blog/lzo-kernel-compression})
+    \item \c{SWAP} Permet de gérer un espace d'échange dur un disque
+    \item   \c{SYSVIPC}  \emph{MQUEUE}   Communication  interprocessus
+      définits par Posix
+    \item \c{IKCONFIG} Embarque le \file{.config} dans le noyau 
+    \item \c{EXPERT}  et \c{EMBEDDED} Débloque  les options permettant
+      principalement de  réduire la taille du noyau  en supprimant des
+      modules importants
+    \item \c{CC_OPTIMIZE_FOR_SIZE} Compile avec \c{-Os}
+    \item \c{KPROBES}, \c{PERF_EVENTS}, \c{PROFILING}, \c{GCOV_KERNEL}
+      active les différentes instrumentation du noyau
+    \end{itemize} 
+  \item \c{MODULES} Permet d'activer la gestion des modules
+  \item  \c{BLOCK}  Il  est  possible  de désactiver  la  gestion  des
+    périphérique de block si votre système n'utilise que de la mémoire
+    flash.
+    \begin{itemize} 
+      \emph{IO  Schedulers} Permet  de choisir  un  ordonnanceur d'E/S
+      différent de celui proposé en standard
+    \end{itemize} 
+  \item \emph{System type}
+    \begin{itemize} 
+    \item Permet de choisir le type d'architecture et de chipset
+    \item Il est possible de désactiver certains cache lors des phases
+      de développement
+    \item Vous trouveez aussi dans ce menu les options relative au jeu
+      d'instructions accepté
+    \end{itemize}
+  \item \emph{Kernel features}
+    \begin{itemize} 
+    \item \c{HZ} (pas sur  ARM) Définit l'interval de réordonnancement
+      de l'ordonnanceur.  Plus cette valeur est forte, plus l'overhead
+      introduit par  le changement de  contexte est important  et plus
+      les temps de r'éponse des tâches est court
+    \item \c{NO_HZ}  Permet de  rendre la période  de réordonnancement
+      des  tâches dynamique. Devrait  permettre un  léger gain  de CPU
+      (finalement négligeable  avec l'ordonnanceur en  $o(1)$). Permet
+      surtout de gagner en consommation électrique.
+    \item   \c{HIGH_RES_TIMER}  Gère  les   timer  avec   une  horloge
+      différente de l'ordonnanceur (l'horloge  est alors géré comme un
+      périphérique  à  part).  Permet  d'obtenir  une  bien  meilleure
+      précision  sur  les  mesure  de  temps, à  condition  que  votre
+      matériel possède une horloge \emph{HighRes}.
+    \item  \emph{Preemption Model} Permet  d'activer la  préemption du
+      noyau. Le pire temps réponse sont améliorés, mais le temps moyen
+      est généralement moins bon.  Un noyau préemptif stresse beaucoup
+      plus  de code.   Ne  pas  activer si  vous  utlisez des  drivers
+      extérieur non garanti pour cette option.
+    \item  \c{RT_PREEMPT}   (sur  certaines  architectures  seulement)
+      Permet de  threader les IRQ  et ainsi de remplacer  les spinlock
+      par des  mutex.  Ajoute un protocole d'héritage  de priorité aux
+      mutex.  Le   kernel  devient  alors   totalement  préemptif.   A
+      n'utilisez  que lors  d'application temps  réelle.   Etudier des
+      solutions à base d'hyperviseurs.
+    \item Ne confondez  pas la préemption du noyau  avec la préemption
+      des tâches utilisateur.
+    \item \c{EABI},  \c{OABI}, etc...  Différentes  format d'appel des
+      fonctions. Spécifique à ARM (mais très important)
+    \item  \emph{Memory Model} Permet  de gérer  les futurs  système à
+      mémoire asymétriques entre les CPU
+    \item  \c{COMPACTION} Permet  de  compresser les  page de  mémoire
+      plutôr que  les mettre en swap. Particulièrement  utile dans les
+      systèmes sans swap !
+    \item  \c{KSM} Permet  de fusionner  les page  mémoire identiques.
+      Uniquement   utile   avec  des   machines   virtuelles  ou   des
+      chroot. Sinon, les noyau sait que le fichier est déjà en mémoire
+      et ne duplique pas la page
+    \end{itemize} 
+  \item \emph{Boot options}
+    \begin{itemize}
+    \item \c{USE_OF} Utilise \emph{OpenFirmware}, le nouveau format de
+      description matériel appellé aussi \emph{Flatten Device Tree}
+    \item \c{CMDLINE}  Permet de passer  des paramètres par  défaut au
+      noyau (nous verrons cela un peu plus loin)
+    \item \c{ZBOOT_*}  Permettent de démarrer le noyau  à partir d'une
+      ROM, d'une MMC, etc...
+    \item \c{XIP_KERNEL}  Permet d'executer  un noyau non  compressé à
+      partir d'une ROM
+    \end{itemize}
+  \item  \emph{Floating point  emulation} Si  une instruction  sur des
+    nombres à  virgule flottante  est rencontrée et  ne peut  pas être
+    éxecutée, le  kernel peut  alors émuler l'instruction  (voir aussi
+    \c{-msoft-float})
+  \item \emph{Networking}
+    \begin{itemize}
+    \item Possibilité d'activer les innombrables protocoles réseaux de
+      niveaux 1, 2 et 3
+    \item  \emp{Network options} Beaucoup  de fonctionnalité  réseau :
+      client dhcp, bootp, rarp, ipv6, ipsec, les protocole de routage,
+      gestion de QoS, support des VLAN, du multicast,
+    \item \c{UNIX} Les sockets \emph{UNIX} (cf. sortie de \c{netstat})
+    \item \c{INET} Les sockets bien connue \emph{TCP/IP}
+    \item \c{NETFILTER} Le  firewall de Linux.  D'innombrable options.
+      Permet  l'utilisation d'iptables  si  l'option \c{IPTABLES}  est
+      active.
+    \end{itemize} 
+  \item \emph{File systems} 
+    \begin{itemize}
+    \item  \c{EXT2_FS},   \c{EXT3_FS},  \c{EXT4_FS}  Le   file  system
+      standard de Linux
+    \item \c{FUSE_FS}  Permet de développer  des file systems  en user
+      space
+    \item   \emph{Pseudo  filesystems}   File  system   sans  supports
+      physiques
+      \begin{itemize} 
+      \item \c{TMPFS} File system  volatile en RAM.  Très utilisé avec
+        des système en flash vu que  l'accès à la Flash est couteux en
+        temps et destructeur pour la flash
+      \item \c{SYSFS} et \c{PROC_FS} Permettent au noyau d'exporter un
+        certain nombre  de donnée  interne vers le  userland. Beaucoup
+        d'outils système tirent  lors informations de ces filesystems.
+        Ils doivent  être monté dans \c{/sys}  et \c{/proc}. \c{/proc}
+        est plutôt  orienté processus  alors que \c{/sys}  est orienté
+        modules et paramètrage du noyau.
+      \end{itemize} 
+    \item \emph{Miscellaneous  filesystems} Contient des  file systems
+      spécifiques
+      \begin{itemize} 
+      \item \c{ECRYPT_FS} Gestion transparent d'un file system codé
+      \item  \c{JFFS2_FS} Spécialisé  pour les  Flash avec  gestion de
+        l'écriture uniforme, des bad blocks et des erase blocks.
+      \item \c{CRAMFS} Spécialisé pour ROM sans accès en écriture. 
+      \item  \c{SQUASHFS} Idem \c{CRAMFS} mais fortement compressé
+      \end{itemize} 
+    \item \emph{Network File Systems}
+      \begin{itemize}
+      \item \c{NFS_FS}  File system  sur ethernet.  Très  utilisé dans
+        l'embarqué durant les phases de développement
+      \item \c{ROOT_NFS} Permet de démarrer le noyau sur une partition
+        NFS
+      \end{itemize} 
+    \end{itemize} 
+  \item \emph{Device Drivers} Des centaines de drivers. Notons:
+    \begin{itemize}
+    \item   \c{UEVENT_HELPER_PATH}  Le  programme   appellé  lorsqu'un
+      nouveau            périphérique            est           détecté
+      (cf.              \file{/proc/sys/kernel/hotplug}             et
+      \file{/sys/kernel/uevent_helper})
+    \item   \c{DEVTMPFS}  un   tmpfs  spécifique   pour   les  devices
+      automatiquement  monté sur  \file{/dev}.  Les  file  device sont
+      alors   automatiquement  créés   sans   l'aide  d'un   programme
+      extérieur. (nous y reviendrons)
+    \item \c{MTD} Les flash
+    \item \c{STAGING} Des drivers en cours de beta 
+    \end{itemize} 
+  \item  \emph{Kernel  Hacking}  Options  concernant le  débugging  du
+    noyau. Nous y reviendrons dans la section Debug
+  \item  \emph{Security  Options}  Plusieurs framework  permettant  de
+    gérer des  droits plus  fin sur les  programmes executés  et/ou de
+    garantir l'intégrité des donnée à l'aide de TPM.
+  \item   \emph{Cryptographic   API}   Fonctions   de   cryptographies
+    selectionnées     automatiquement     par     d'autres     modules
+    (particulièrement les protocoles réseaux)
+  \item  \emph{Library routines}  Idem  \emph{Cryptographic API}  mais
+    avec principalement des calculs de checksum.
+  \end{itemize} 
+\end{frame}
+
+%%% ICI
+% Ajouter slide au sujet du boot tftp puis nfs
+
+
 \begin{frame}[fragile=singleslide]{Notre cas}
   Dans notre cas, nous utilisons U-Boot (standard)
   \begin{itemize}
@@ -632,45 +843,7 @@ host% ln -s uImage-2.6.33.7 /srv/tftp/uImage
   \end{itemize}
 \end{frame}
 
-\section{Options à connaitre}
-%-------- 
- % Les option importantes
-  %   ARCH
-  %   CROSS_COMPILE
-  %   LOCAL_VERSION
-  %   HZ
-  %   SMP
-  %   CMDLINE
-  %   PREEMPT
-  %   HACKING
-  %   XIP
-  %   EMBEDED
-  %   PROCFS
-  %   INITRAMFS
-  %   KVM/XEN/VBOX
-\begin{frame}[fragile=singleslide]{Options à connaitre}
-  \begin{itemize}
-  \item Kernel Compression (Gzip/LZO)
-  \item Support for paging of anonymous memory (swap)
-  \item Kernel .config support
-  \item Kernel log buffer size
-  \item Group CPU scheduler
-  \item Initial RAM filesystem and RAM disk
-  \item Optimize for size
-  \item Configure standard kernel features (for small systems)
-  \item EXecute In Place
-  \end{itemize}
-  \note[item]{TODO P3 faire une liste exaustive}
-\end{frame}
-
-\begin{frame}[fragile=singleslide]{Compilation du noyau}
-  \begin{itemize}
-  \item Verifier les options du type de processeur
-  \item Cocher NFS
-  \item Le reste ne devrait pas empecher ce demarrer votre cible
-  \end{itemize}  
-\end{frame} 
-%------- 
+% Parler de la structure du rootfs
 
 \section{Options de démarrage}
   % La commandline
@@ -679,7 +852,9 @@ host% ln -s uImage-2.6.33.7 /srv/tftp/uImage
   % √  ip
   % √  root=/dev/nfs
   % √  console
-  %   panic
+  %    panic
+  %    memarea
+  %    mem
   % √  <module>.<option>
 \begin{frame}[fragile=singleslide]{Passage d'options au noyau}
   \begin{itemize} 
@@ -789,6 +964,7 @@ host target {
 % TODO
 \end{frame} 
 
+
   % Fabriquer un initramfs
 \section{Initramfs}
 
@@ -876,7 +1052,6 @@ uboot> bootm 21000000 22000000
   \end{itemize}
 \end{frame} 
 
- % Le répertoire /proc
 
 
 
