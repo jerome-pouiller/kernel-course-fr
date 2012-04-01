@@ -39,8 +39,8 @@
 % }
 \date[Avr. 2012]{10-12 Avril 2012}
 % Pour le PDF seulement:
-% \subject{Temps Réel}
-% \keywords{temps réel, thread, xenomai, OS, Linux}}
+% \subject{}
+% \keywords{noyau, kernel, OS, Linux}}
   
 \begin{document}
  
@@ -60,45 +60,12 @@
     \end{itemize} 
   \end{frame}
   
-% Documentation Documentation/kernel-doc-nano-HOWTO.txt make mandocs (plus complet) et htmldocs (plus fini) (\$OUTPUT/Documentation/DocBook/man/).
-% Poour le HTML, Regarder Kernel-API
-
-% (d'apres nano-HOWTO)
-% $ cd linux
-% $ scripts/kernel-doc -man $(find -name '*.c') | split-man.pl /tmp/man
-% $ scripts/kernel-doc -man $(find -name '*.h') | split-man.pl /tmp/man
-
-% Here is split-man.pl:
-
-% -->
-% #!/usr/bin/perl
-
-% if ($#ARGV < 0) {
-%    die "where do I put the results?\n";
-% }
-
-% mkdir $ARGV[0],0777;
-% $state = 0;
-% while (<STDIN>) {
-%     if (/^\.TH \"[^\"]*\" 9 \"([^\"]*)\"/) {
-%         if ($state == 1) { close OUT }
-%         $state = 1;
-%         $fn = "$ARGV[0]/$1.9";
-%         print STDERR "Creating $fn\n";
-%         open OUT, ">$fn" or die "can't open $fn: $!\n";
-%         print OUT $_;
-%     } elsif ($state != 0) {
-%         print OUT $_;
-%     }
-% }
-
   \include{present}
   \include{compile}
   \include{modules}
-  \include{debug}
   \include{api}
-  \include{contrib}
-
+  \include{debug}
+%  \include{contrib}
 
 \end{document}
 

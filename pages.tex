@@ -1,0 +1,28 @@
+% Copyright 2009 by Jérôme Pouiller
+%
+% This file may be distributed and/or modified under term of the Creative
+% Common Licence
+%\documentclass[a4paper,auto]{article}
+\documentclass[a4paper,landscape,auto]{article}
+
+%\usepackage{pgfpages}
+%\pgfpagesuselayout{4 on 1}[border shrink=5mm]
+
+\usepackage{pdfpages}
+
+\begin{document}
+%\includepdf[pages={1,40-75},fitpaper=true]{out/main.pdf}
+
+% Taille des frame: 128mm x 96mm
+% Taille des pages: 297mm x 210mm
+%     -> 210mm x scale = 210mm - 2 x delta
+%     -> (210 - 2 * 5) / 210 = scale = 0.952
+\includepdf[pages=-, delta=5mm 5mm, nup=2x2, scale=0.952]{out/main.pdf}
+
+% Taille des frame: 128mm x 96mm
+% Taille des pages: 297mm x 210mm
+%     -> 297mm x scale = 297mm - 2 x delta
+%     -> (297 - 2 * 5) / 297 = scale = 0.966
+%\includepdf[pages=70-80, delta=5mm 5mm, nup=1x2, scale=0.966]{present/realtime-present.pdf}
+
+\end{document}

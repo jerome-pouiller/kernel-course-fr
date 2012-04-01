@@ -11,6 +11,14 @@
 
 \part{L'API}
 
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \tableofcontents[currentpart]
+\end{frame}
+
 \section{Les fonctions inspirés de la libc}
 
 \begin{frame}{Fonctions standards de \file{string.h}}
@@ -79,10 +87,10 @@ writeb(base_device->register, 1);
   \begin{itemize} 
   \item On doit  d'abord informer le noyau que  l'on utilise une plage
     de ports avec
-    \begin{itemize} 
-    \item \c{struct ressource *request_region(unsigned long start, unsigned long len, char *name)}
-    \item \c{void release_region(unsigned long start, unsigned long len)}
-    \end{itemize}
+    \begin{lstlisting} 
+struct ressource *request_region(unsigned long start, unsigned long len, char *name);
+void release_region(unsigned long start, unsigned long len);
+    \end{lstlisting} 
   \item Référence: \c{linux/ioport.h}
   \item  Permet d'éviter que  deux drivers  essayent de  referencer la
     même plage de ports.
@@ -90,10 +98,10 @@ writeb(base_device->register, 1);
     actuellement utilisés en lisant le fichiers \file{/proc/ioports}
   \item Une fois réservé, il est possible de lire/écrire sur les ports
     avec :
-    \begin{itemize} 
-    \item \c{u\{8,16,32\} in\{b,w,l\}(int port)}
-    \item \c{void out\{b,w,l\}(u\{8,16,32\} value, int port)}
-    \end{itemize} 
+\begin{lstlisting} 
+u\{8,16,32\} in\{b,w,l\}(int port);
+void out\{b,w,l\}(u\{8,16,32\} value, int port);
+\end{lstlisting} 
   \item Ces  fonction s'occuppe  de convertir les  donnée dans  le bon
     endian
   \item Référence: \c{asm/io.h}
@@ -138,6 +146,23 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
   \item Cas notable des accès PCI (little endian obligatoire)
   \end{itemize} 
 \end{frame} 
+
+
+\begin{frame}[fragile=singleslide]{Accèder aux IO en userspace}
+  \begin{itemize} 
+  \item  Le   device  \c{/dev/mem}  est  un   fichier  fichier  device
+    permettant d'accèder aux addresses physiques.
+  \item Il est possible d'utiliser \c{mmap} sur ce fichier et d'écrire
+    aux addresses occuppées par des périphériques
+  \item Sur les architecture utilisant PIO, il est possible de demande
+    au  noyau  de  laisser   un  processus  utilisateur  utiliser  les
+    instruction  assembleurs  \c{out*} et  \c{in*}  pour qu'il  puisse
+    accèder aux périphérique avec \c{ioperm} et \c{iopl}.
+  \item C'est  ainsi que fonctionne les serveurx  graphques XFree86 ou
+    xorg
+  \end{itemize} 
+\end{frame} 
+
 
 \section{Allouer de la memoire}
 
@@ -200,12 +225,12 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
 \begin{frame}[fragile=singleslide]{Les pages}
   \begin{itemize} 
   \item Il est possible d'allouer et de désallouer des pages avec:
-    \begin{itemize} 
-    \item \c{struct page *alloc_pages(unsigned int flags, unsigned int order)}
-    \item \c{struct page *alloc_page(unsigned int flags)}
-    \item \c{void __free_page(struct page *page)}
-    \item \c{void __free_pages(struct page *page, unsigned int order)}
-    \end{itemize} 
+    \begin{lstlisting} 
+struct page *alloc_pages(unsigned int flags, unsigned int order);
+struct page *alloc_page(unsigned int flags);
+void __free_page(struct page *page);
+void __free_pages(struct page *page, unsigned int order);
+    \end{lstlisting} 
   \item Les \c{flags} sont décrit un peu plus loin
   \item  \c{order} indique  le nombre  de  pages à  allouer. Le  noyau
     alloue $2^{order}$ pages
@@ -213,13 +238,13 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
     nécessaire pour avoir \c{size} octets de memoire
   \item Il  existe des  raccourcis pour allouer  une nouvelle  page et
     obtenir son addresse:
-    \begin{itemize}
-    \item \c{unsigned long get_zeroed_page(int flags)}
-    \item \c{unsigned long __get_free_page(int flags)}
-    \item \c{unsigned long __get_free_pages(int flags, unsigned long order)}
-    \item \c{void free_page(unsigned long addr)}
-    \item \c{void free_pages(unsigned long addr, unsigned long order)}
-    \end{itemize} 
+    \begin{lstlisting} 
+unsigned long get_zeroed_page(int flags);
+unsigned long __get_free_page(int flags);
+unsigned long __get_free_pages(int flags, unsigned long order);
+void free_page(unsigned long addr);
+void free_pages(unsigned long addr, unsigned long order);
+    \end{lstlisting} 
   \item Référence: \c{linux/gfp.h}, \c{/proc/meminfo}
   \item Il est  possible d'allouer des zones de  mémoires plus petites
     en utilisant le \c{slab} ou \c{vmalloc}
@@ -236,16 +261,17 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
     en lisant le fichier \cmd{/proc/slabinfo}
   \item  Il est  possible d'allouer  et  de désallouer  des espace  de
     mémoire avec le Slab en utilisant:
-    \begin{itemize} 
-    \item \c{void *kmalloc(size_t size, gfp_t flags)}
-    \item \c{void kzalloc(size_t size, gfp_t flags)} et \c{void kzfree(const void *p)}
-    \item \c{void *kcalloc(size_t n, size_t size, gfp_t flags)}
-    \item \c{void kfree(const void *objp)}
-    \end{itemize} 
+    \begin{lstlisting} 
+void *kmalloc(size_t size, gfp_t flags);
+void kzalloc(size_t size, gfp_t flags);
+void kzfree(const void *p);
+void *kcalloc(size_t n, size_t size, gfp_t flags);
+void kfree(const void *objp);
+    \end{lstlisting} 
   \item On retrouve aussi l'équivalent de \c{realloc}:
-    \begin{itemize} 
-    \item \c{void *krealloc(const void *p, size_t new_size, gfp_t flags)}
-    \end{itemize} 
+    \begin{lstlisting} 
+void *krealloc(const void *p, size_t new_size, gfp_t flags);
+    \end{lstlisting} 
   \item Sauf mention contraire, le Slab retourne des addresse logiques
   \item Dans tous les cas, le Slab retourne de la mémoire physiquement
     contigüe
@@ -260,16 +286,16 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
 
   Le cas échént, il est  même possible d'utiiser vos propres fonctions
   d'allocation:
-  \begin{itemize} 
-  \item \c{mempool_t *mempool_create(int min_nr, mempool_alloc_t *alloc_fn, mempool_free_t *free_fn, void *data)}
-  \item \c{void mempool_destroy(mempool_t *pool)}
-  \end{itemize} 
+  \begin{lstlisting} 
+mempool_t *mempool_create(int min_nr, mempool_alloc_t *alloc_fn, mempool_free_t *free_fn, void *data);
+void mempool_destroy(mempool_t *pool);
+  \end{lstlisting} 
   Vous pouvez garder la politique d'allocation par défaut en
   utilisant:
-  \begin{itemize} 
-  \item \c{void *mempool_alloc(mempool_t *pool, int gfp_mask)}
-  \item \c{void mempool_free(void *element, mempool_t *pool)}
-  \end{itemize} 
+  \begin{lstlisting} 
+void *mempool_alloc(mempool_t *pool, int gfp_mask);
+void mempool_free(void *element, mempool_t *pool);
+  \end{lstlisting} 
   Référence: \c{linux/mempool.h}, \c{/proc/slabinfo}
 \end{frame}
 
@@ -296,12 +322,12 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
 \begin{frame}[fragile=singleslide]{vmalloc}
   \begin{itemize} 
   \item Il est possible d'allouer de la mémoire non-contigüe avec
-    \c{vmalloc}
-    \begin{itemize} 
-    \item \c{void *vmalloc(unsigned long size)}
-    \item \c{void *vzalloc(unsigned long size)}
-    \item \c{void vfree(void *addr)}
-    \end{itemize} 
+    \c{vmalloc}:
+    \begin{lstlisting} 
+void *vmalloc(unsigned long size);
+void *vzalloc(unsigned long size);
+void vfree(void *addr);
+    \end{lstlisting} 
   \item Alloue dans la mémoire haute
   \item ...  ainsi la mémoire allouée  peut être non  contigüe dans la
     mémoire physique
@@ -342,12 +368,20 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
   particulièrement utile pour implémentér l'appel \c{mmap}:
   \begin{lstlisting} 
 int remap_pfn_range(
-  struct vm_area_struct *vma, /* Espace d'addressage virtuel dans lequel le mapping doit s'effectuer. Dans le cadre de mmap, fournie par le kernel.*/
-  unsigned long addr,  /* L'addresse à l'intérieur de vma (=offset)*/
-  unsigned long pfn,   /* La page physique à mapper     */
-  unsigned long size,  /* Taille de l'interval à mapper */
-  pgprot_t flags);     /* flags éventuels (reprendre vma->vm_page_prot) */
+  struct vm_area_struct *vma,
+  unsigned long addr, 
+  unsigned long pfn,  
+  unsigned long size, 
+  pgprot_t flags);    
   \end{lstlisting} 
+  \begin{itemize}
+  \item  \c{vma} Espace  d'addressage virtuel  dans lequel  le mapping
+    doit s'effectuer. Dans le cadre de mmap, fournie par le kernel.
+  \item \c{addr} L'addresse à l'intérieur de \c{vma} (=offset)
+  \item \c{pfn} La page physique à mapper     
+  \item \c{size} Taille de l'interval à mapper 
+  \item \c{flags} Flags éventuels (reprendre \c{vma->vm_page_prot})
+  \end{itemize} 
 
   Il     est    aussi     possible     de    surcharger     l'attribut
   \c{vm_operations_struct *  vm_ops} de la  \c{vm_area_struct} afin de
@@ -476,7 +510,7 @@ void disable_irq(unsigned int irq)
   \item Les Softirq sont réservés aux tâche demandant une fréquence de
     traitement  importante.  Les  developpeurs  du kernel  gardent  le
     nombre de Softirq en quantité limitée:
-    \begin{lstlisting} 
+    \begin{lstlisting}[language=sh]
 HI_SOFTIRQ,         BLOCK_IOPOLL_SOFTIRQ,
 TIMER_SOFTIRQ,      TASKLET_SOFTIRQ,
 NET_TX_SOFTIRQ,     SCHED_SOFTIRQ,
@@ -495,21 +529,21 @@ BLOCK_SOFTIRQ,      RCU_SOFTIRQ,
   \item  HI est  executé  avec la  priorité  la plus  haute parmi  les
     Softirq, alors que les Tasklets ont quasiement la priorité la plus
     basse
-  \item Pour initialiser un tasklet:
+  \item Pour initialiser et désenregistrer un tasklet:
     \begin{lstlisting} 
-DECLARE_TASKLET(name, func, data) /* Initialisation à la déclaration */
-void tasklet_init(struct tasklet_struct *t, void (*func)(unsigned long), unsigned long data)} /* Initialisation dynamique */
-void tasklet_kill(struct tasklet_struct *t)} /* Désenregistre la tasklet */
+DECLARE_TASKLET(name, void (*func)(unsigned long), unsigned long data);
+void tasklet_init(struct tasklet_struct *t, void (*func)(unsigned long), unsigned long data);
+void tasklet_kill(struct tasklet_struct *t);
     \end{lstlisting} 
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Tasklets}
   \begin{itemize} 
-  \item Pour demander l'éxecution d'un Tasklet:
+  \item Pour demander l'éxecution d'un Tasklet (dans le SoftIRQ Tasklet et dans le SoftIRQ HI)
     \begin{lstlisting} 
-void tasklet_schedule(struct tasklet_struct  *t) /* Dans le SoftIRQ Tasklet */
-void tasklet_hi_schedule(struct tasklet_struct *t) /* Idem, mais dans le SoftIRQ HI */
+void tasklet_schedule(struct tasklet_struct  *t)
+void tasklet_hi_schedule(struct tasklet_struct *t)
     \end{lstlisting} 
   \item Si  la tasklet était deja  prévue pour être  éxecutée, elle ne
     sera executé qu'une fois.
@@ -600,15 +634,17 @@ int kthread_stop(struct task_struct *k)
   \item Permet d'attendre de manière passive un évènement. 
   \item Peut-être utilisé
     dans le contexte d'une tâche ou dans une kthread.
-  \item  Cela  permet  de  faire  passer la  tâche  associée  de  l'état
+  \item  Cela permet  de  faire  passer la  tâche  associée de  l'état
     \emph{run} à l'état \emph{wait}
-  \item Fonctionne de manière similaire à des \c{pthread_cond} ou des \c{rt_event} sous Xenomai ou les \c{OSFlags} sous µC/OS-II
+  \item Fonctionne de manière  similaire à des \c{pthread_cond} ou des
+    \c{rt_event} sous Xenomai ou les \c{OSFlags} sous µC/OS-II
   \item Pour déclarer:
     \begin{itemize} 
     \item \c{DECLARE_WAIT_QUEUE_HEAD(my_queue)} : initialisation lors de
       la déclaration
-    \item \c{wait_queue_head_t  my_queue; init_waitqueue_head(&my_queue)}:  Déclaration  et initialisation
-      séparés
+    \item
+      \c{wait_queue_head_t  my_queue; init_waitqueue_head(&my_queue)}:
+      Déclaration et initialisation séparés
     \end{itemize} 
   \end{itemize}
 \end{frame}
@@ -617,25 +653,41 @@ int kthread_stop(struct task_struct *k)
   \begin{itemize} 
   \item Pour attendre un évènement:
     \begin{itemize} 
-    \item \c{void wait_event(queue, condition)}: Attend un evenement sur
-      la queue ET que la condition soit vérifiée
-    \item  \c{int wait_event_killable(queue,  condition)}:  Idem  mais
-      retourne  une  erreur  si  executé  dans un  appel  system  et  le
-      processus est tué avec \c{SIGKILL}
-    \item \c{int  wait_event_interruptible(queue, condition)}: Idem mais
-      retourne  une  erreur  si  executé  dans un  appel  system  et  le
-      processus recoit un signal
-    \item   \c{void wait_event_timeout(queue, condition)}:   Idem
+    \item Attend  un evenement sur la  queue ET que  la condition soit
+      vérifiée
+      \begin{lstlisting} 
+void wait_event(queue, condition);
+      \end{lstlisting} 
+    \item  Idem mais  retourne une  erreur  si executé  dans un  appel
+      system et le processus est tué avec \c{SIGKILL}
+      \begin{lstlisting} 
+int wait_event_killable(queue,  condition);
+      \end{lstlisting} 
+    \item  Idem mais  retourne une  erreur  si executé  dans un  appel
+      system et le processus recoit un signal
+      \begin{lstlisting} 
+int  wait_event_interruptible(queue, condition);
+      \end{lstlisting} 
+    \item   Idem
       \c{wait_event} mais avec un timeout
-    \item  \c{void  wait_event_tinterruptible_imeout(queue, condition)}:
-      \c{wait_event_timeout} + \c{wait_event_interruptible}
+      \begin{lstlisting} 
+void wait_event_timeout(queue, condition);
+      \end{lstlisting} 
+    \item \c{wait_event_timeout} + \c{wait_event_interruptible}:
+      \begin{lstlisting} 
+void  wait_event_tinterruptible_imeout(queue, condition);
+      \end{lstlisting} 
     \end{itemize} 
   \item Pour réveiller les tâches en attentes
     \begin{itemize} 
-    \item \c{wait_up(queue)} Réveil tous les processus en attente sur la
-      queue
-    \item  \c{wait_up_interruptible(queue)}  Idem  mais,  seulement  les
-      interruptibles
+    \item Réveil tous les processus en attente sur la queue
+      \begin{lstlisting} 
+wait_up(queue); 
+      \end{lstlisting} 
+    \item Idem mais, seulement les interruptibles
+      \begin{lstlisting}
+wait_up_interruptible(queue);
+      \end{lstlisting} 
     \end{itemize}
   \end{itemize}  
 \end{frame} 
@@ -829,23 +881,39 @@ kfifo_is_empty(fifo)
   \end{itemize} 
 \end{frame}
 
-\begin{frame}{Mutex}
+\begin{frame}[fragile=singleslide]{Mutex}
   Méthodes assez classiques des mutex:
   \begin{itemize}
-  \item \c{DEFINE_MUTEX(name)} Initialisation à la déclaration
-  \item \c{void mutex_init(struct *mutex)} Initialisation dynamique
-  \item    \c{mutex_lock(struct     mutex    *lock)}    Acquiert    le
-    mutex. Attention, si appellé depuis un processus, celui-ci ne peut
-    plus être tué
-  \item  \c{mutex_lock_killable(struct  mutex  *lock)} Idem,  mais  le
-    processus peut-être tué
-  \item \c{mutex_lock_interruptible(struct mutex *lock)} Idem, mais le
-    processu peut être interrompu avec un signal
-  \item  \c{mutex_trylock(struct  mutex  *lock)} Idem,  mais  retourne
-    immédiatement si le mutex est déjà locké
-  \item \c{mutex_is_locked(struct  mutex *lock)} Retourne  si le mutex
-    est locké
-  \item \c{mutex_unlock(struct mutex *lock)} Unlock le mutex
+  \item Déclarer et initialiser un mutex:
+    \begin{lstlisting} 
+DEFINE_MUTEX(name);
+void mutex_init(struct *mutex);
+    \end{lstlisting} 
+  \item  Acquierrir   le  mutex.  Attention,  si   appellé  depuis  un
+    processus,     celui-ci     ne      peut     plus     être     tué
+    \begin{lstlisting} 
+mutex_lock(struct mutex *lock);
+    \end{lstlisting} 
+  \item Idem, mais le processus peut-être tué
+    \begin{lstlisting} 
+mutex_lock_killable(struct  mutex  *lock);
+    \end{lstlisting} 
+  \item Idem, mais le processus peut être interrompu avec un signal
+    \begin{lstlisting} 
+mutex_lock_interruptible(struct mutex *lock);
+    \end{lstlisting} 
+  \item Idem, mais retourne immédiatement si le mutex est déjà locké
+    \begin{lstlisting} 
+mutex_trylock(struct  mutex  *lock); 
+    \end{lstlisting} 
+  \item Retourne 1 si le mutex est locké
+    \begin{lstlisting} 
+mutex_is_locked(struct  mutex *lock);
+    \end{lstlisting} 
+  \item  Unlock le mutex
+    \begin{lstlisting} 
+mutex_unlock(struct mutex *lock);
+    \end{lstlisting} 
   \end{itemize}
   Réfrence: \c{linux/mutex.h}
 \end{frame} 
@@ -876,18 +944,33 @@ Dans la même branche, le noyau propose aussi:
     interruptions afin de garantir que l'on ne sera pas interrompu.
   \item   Ces fonctions sont à utiliser avec parcimonie:
     \begin{itemize} 
-    \item    \c{local_irq_save(flags)}    \c{local_irq_restore(flags)}
-      Sauve/restore l'état des interuptions dans/de flags et désactive
-      les interruptions
-    \item        \c{local_irq_disable()}        \c{local_irq_enable()}
-      Désactive/Active les interruptions  (à priori, toujours utiliser
-      les versions \c{_save} et \c{_restore})
-    \item \c{local_irq_disabled()}  Retourne vrai si les interruption
-      du CPU local sont désactivées
-    \item         \c{local_bh_disable()}         \c{local_bh_enable()}
-      Désactive/Réactive les softirq (bottom halves)
-    \item          \c{preempt_disable()}          \c{preempt_enable()}
-      Désactive/Réactive la préemption
+    \item  Sauve/restore  l'état  des  interuptions dans/de  flags  et
+      désactive les interruptions:
+      \begin{lstlisting} 
+local_irq_save(unsigned long flags);
+local_irq_restore(unsigned long flags);
+      \end{lstlisting} 
+    \item  Désactive/Active  les  interruptions  (à  priori,  toujours
+      utiliser les versions \c{_save} et \c{_restore})
+      \begin{lstlisting} 
+local_irq_disable();
+local_irq_enable();
+      \end{lstlisting} 
+    \item  Retourne  vrai  si  les  interruption  du  CPU  local  sont
+      désactivées:
+      \begin{lstlisting} 
+local_irq_disabled();
+      \end{lstlisting} 
+    \item Désactive/Réactive les softirq (bottom halves):
+      \begin{lstlisting} 
+local_bh_disable();
+local_bh_enable();
+      \end{lstlisting} 
+    \item Désactive/Réactive la préemption
+      \begin{lstlisting} 
+preempt_disable();
+preempt_enable();
+      \end{lstlisting} 
     \end{itemize} 
   \end{itemize} 
 \end{frame} 
@@ -906,26 +989,36 @@ Dans la même branche, le noyau propose aussi:
   \item   Principalement  utilisé   lors  de   en  complément   de  la
     désactivation des interruption
   \item La préemption est aussi désactivé durant un spinlock
-  \item Le noyau propose aussi des \emph{Read Write Spinlock} : \c{rwlock_t} (Référence \file{linux/rwlock.h})
+  \item  Le  noyau propose  aussi  des  \emph{Read  Write Spinlock}  :
+    \c{rwlock_t} (Référence \file{linux/rwlock.h})
   \end{itemize}  
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Spin Lock}
   API:
   \begin{itemize}
-  \item                                      \c{DEFINE_SPINLOCK(lock)},
-    \c{spin_lock_init(spinlock_t *lock)} Initialise un spin lock
-  \item                \c{spin_lock(spinlock_t                *lock)},
-    \c{spin_trylock(spinlock_t                                 *lock)},
-    \c{spin_unlock(spinlock_t   *lock)}    Idem   que   les   fonction
-    \c{mutex_*}
-  \item            \c{spin_lock_irqsave(spinlock_t            *lock)},
-    \c{spin_unlock_irqrestore(spinlock_t     *lock)}    Spinlock    et
-    désactive/réactive    les   interruptions   sur    le   processeur
-    courant. Les flags contiennent l'états du mask d'interruption
-  \item               \c{spin_lock_bh(spinlock_t               *lock},
-    \c{spin_unlock_bh(spinlock_t       *lock)}       spinlock       et
-    désactive/réactive les softirq.
+  \item Déclarer et initialiser un spin lock:
+    \begin{lstlisting} 
+DEFINE_SPINLOCK(lock);
+spin_lock_init(spinlock_t *lock);
+    \end{lstlisting} 
+  \item Idem que les fonction \c{mutex_*}:
+    \begin{lstlisting} 
+spin_lock(spinlock_t *lock);
+spin_trylock(spinlock_t *lock);
+spin_unlock(spinlock_t *lock);
+    \end{lstlisting} 
+  \item Lock et désactive/réactive les interruptions sur le processeur
+    courant.  Les flags contiennent l'état du masque d'interruption:
+    \begin{lstlisting} 
+spin_lock_irqsave(spinlock_t *lock, unsigned long flags);
+spin_unlock_irqrestore(spinlock_t *lock, unsigned long flags);
+    \end{lstlisting} 
+  \item Spinlock et désactive/réactive les softirq:
+    \begin{lstlisting} 
+spin_lock_bh(spinlock_t *lock);
+spin_unlock_bh(spinlock_t *lock);
+    \end{lstlisting} 
   \end{itemize}
   Référence :  \file{linux/spinlock.h}
 \end{frame}

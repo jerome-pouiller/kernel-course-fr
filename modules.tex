@@ -10,6 +10,15 @@
 %
 
 \part{Les modules}
+
+\begin{frame}
+  \partpage
+\end{frame}
+
+\begin{frame}
+  \tableofcontents[currentpart]
+\end{frame}
+
 \section{Création de modules}
 
   % insmod/rmmmod
@@ -20,6 +29,7 @@
   %   /sys/**/param
   % Les licences
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  Un template de module:
   \lstinputlisting[language=c,firstline=16]{modules/my_module1.c}
 \end{frame}
 
@@ -87,6 +97,7 @@ MODULE_LICENSE
   avec  le noyau  (le résultat  est alors  considéré comme  un travail
   dérivé du noyau). Il doit rester sous la forme d'un module.
 \end{frame}
+
 \begin{frame}[fragile=singleslide]{Les licences}
   En  remplissant  correctement  la  macro  \verb+MODULE_LICENCE+,  le
   système   de  compilation  du   noyau  empêchera   les  compilations
@@ -101,18 +112,22 @@ MODULE_LICENSE
   Quels conséquences?
   \begin{itemize} 
   \item Pas de support de la part de la communauté
-  \end{itemize} 
+  \item Pas de garantie de la qualité du modules
+  \item Mauvaise image auprès de la communauté et de clients
+  \end{itemize}
+
+  Par  expérience,  les modules  propriétaires  que  l'on croise  dans
+  l'embarqué peuvent cacher tout et n'importe quoi.
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Headers}
   Il  n'est  pas   possible  pour  le  noyau  de   compiler  avec  des
-  bibliothèques  extérieur.  En  particulier  avec la  libc. Tous  les
+  bibliothèques extérieur.  En particulier  avec la \c{libc}. Tous les
   headers habituels sont donc inaccessible dans le noyau.
 
   Les headers ``publiques'' sont dans \verb+include/+. On retiendra en
   particulier:       \file{linux/module.h},       \file{linux/init.h},
   \file{linux/kernel.h} indispensables pour compiler un module.
-
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
@@ -121,32 +136,42 @@ MODULE_LICENSE
 
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
-  Makefile:
+  Fichier \c{Makefile} à l'extérieur du noyau:
   \begin{lstlisting}
 obj-m := my_module.o  
   \end{lstlisting}
   Puis, on appelle:
   \begin{lstlisting}
 host$ KDIR=/lib/modules/$(uname -r)/build
-host$ make -C $KDIR ARCH=arm SUBDIRS=$(pwd) modules
+host$ make -C $KDIR ARCH=arm M=$(pwd) modules
   \end{lstlisting} % $
-  Pour améliorer le processus, on ajoute ces lignes dans le Makefile:
+  Il aussi est possible d'appeller les cibles \c{help} et \c{modules_install}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
+  Pour améliorer le processus, on ajoute ces lignes dans le \file{Makefile}:
   \begin{lstlisting}
 KDIR ?= /lib/modules/$(shell uname -r)/build
 
-default:
-        $(MAKE) -C $(KDIR) SUBDIRS=$(shell pwd) modules
+default: modules
+
+modules:
+        $(MAKE) -C $(KDIR) M=$(shell pwd) modules
+
+modules_install:
+        $(MAKE) -C $(KDIR) M=$(shell pwd) modules_install
   \end{lstlisting}
   et on appelle
   \begin{lstlisting}
 host$ make ARCH=arm KDIR=../linux-2.6/usb-a9260 
   \end{lstlisting} % $
+  Référence: \file{Documentation/kbuild/modules.txt}
 \end{frame}
 
   % Compiler à l'interieur du kernel
   % Fonctionnement de Kconfig
 \begin{frame}[fragile=singleslide]{Compilation avec Kmake}
-  Makefile:
+  Fichier \file{Makefile} à l'intérieur de l'arborescence noyau:
   \begin{lstlisting}
 obj-$(MY_COMPILE_OPTION) := my_module.o  
   \end{lstlisting} % $
@@ -156,9 +181,10 @@ obj-$(MY_COMPILE_OPTION) := my_module.o
   \item m: compilé en module
   \item y: compilé en statique
   \end{itemize}
-  Kconfig
+  Fichier \file{Kconfig}:
   \lstinputlisting[langage=]{modules/Kconfig}
   \note[item]{detailler les différentes options de Kconfig}
+  Référence: \file{Documentation/kbuild/makefiles.txt}, \file{Documentation/kbuild/kconfig-language.txt}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Gérer les modules}
@@ -175,19 +201,30 @@ target% insmod my_module.ko
     \begin{lstlisting}
 target% rmmod my_module
     \end{lstlisting}%$
-  \item Afficher le buffer de log du kernel
+  \item Afficher le buffer de log du kernel (Diagnostic MESsaGes)
     \begin{lstlisting}
 target$ dmesg
     \end{lstlisting} %$
-  \item Charger/décharger un module correctement installé/indexé
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Gérer les modules}
+  \begin{itemize} 
+  \item Charger/décharger un  module correctement installé/indexé dans
+    \c{modules.dep}
     \begin{lstlisting}
 target% modprobe my_module
 target% modprobe -r my_module
     \end{lstlisting} %$
-  \item Mettre à jour le fichier de dépendance
+  \item Mettre à jour le fichier de dépendances
     \begin{lstlisting} 
 target% depmod
     \end{lstlisting} %$
+  \item Notons que les  modules sont des binaires \emph{elf} standards
+    qui peuvent être analysés avec les outils standard:
+    \begin{lstlisting}
+host$ arm-linux-objdump -t my_module.ko
+    \end{lstlisting} 
   \end{itemize}
 \end{frame}
 
@@ -198,13 +235,13 @@ target$ modinfo my_module.ko
 target% insmod my_module.ko param=2  
   \end{lstlisting} %$ 
   Il est possible de passer le paramètre au boot avec \c{my_module.param=2}
-\\[2ex]
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Paramètres}
   Nous   devons  déclarer   le  paramètre   à  l'aide   de   la  macro
-  \c{module_param}.
   \begin{lstlisting}[language=c]
 module_param(name, type, perm);
   \end{lstlisting} 
-  Prend en paramètres:
   \begin{itemize} 
   \item \cmd{name}: Nom de la variable utilisée comme paramètre
   \item  \cmd{type}:  Type   du  paramètre  (\cmd{bool},  \cmd{charp},
@@ -222,10 +259,9 @@ static int param = 0;
   \end{lstlisting} 
   Il est fortement recommandé de documenter le paramètre
   \begin{lstlisting}[language=c]
-MODULE_PARM_DESC(param, "Display this value at loading and unloading");
+MODULE_PARM_DESC(param, "Useless parameter");
   \end{lstlisting} 
-Référence : \file{linux/moduleparam.h}
-
+  Référence : \file{linux/moduleparam.h}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{\texttt{/sys}}
@@ -306,11 +342,10 @@ host$ scripts/Lindent my_module.c
   \item  Un  commentaire ne  doit  pas ce  substituer  à  un code  pas
     illisible.  Préférez   réécrire  le  code   plutôt  qu'ajouter  un
     commentaire.
-  \item Les fonction exportée doivent être préfixée par un commentaire
-    la   décrivant.    Ce  commentaire   ne   doit  surtout   explique
-    \emph{comment}  la  fonction marche.   Le  commentaire indique  le
-    \emph{quoi},  mais  surtout   le  \emph{pourquoi}  cette  fonction
-    existe.
+  \item Une fonction exportée doit être préfixée par un commentaire la
+    décrivant.  Ce commentaire ne doit surtout explique \emph{comment}
+    la fonction  marche.  Le commentaire indique  le \emph{quoi}, mais
+    surtout le \emph{pourquoi} cette fonction existe.
   \item Ces  commentaires sont  placée avant la  \emph{définition} des
     fonctions.  Les  fonction du noyau  sont souvent définie  dans les
     headers.  Du  coup, les commentaires sont parfois  dans le fichier
@@ -334,7 +369,7 @@ host$ scripts/Lindent my_module.c
     invoquée dans les DocBook sous forme de pages de man.
   \item    \url{http://kernel.org/doc}     regroupe    les    diverses
     documentations en ligne
-  \item Dans les commentaire du noyau (fichiers .c ou .h)
+  \item Dans les commentaires du noyau (fichiers \c{.c} ou \c{.h})
   \item  \url{http://lxr.linux.no} offre  une interface  permettant de
     rapidement  chercher des  symboles  et naviguer  dans  le code  du
     noyau.
@@ -342,20 +377,21 @@ host$ scripts/Lindent my_module.c
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Trouver de l'aide}
-Demander de l'aide à la communauté
-    \begin{itemize}
-    \item Le  fichier MAINTAINERS contient la liste  des mainteneur de
-      chaque sous-système
-    \item Les entrées commencant par \texttt{L:} indique des mailing
-      list
-    \item Notons \email{linux-newbie@vger.kernel.org}
-    \item MAINTAINERS  liste aussi les sites  officiel, les fichiers
-      de documentation, etc...   pour les différents sous-projets du
-      noyau
-    \item \c{git blame} permet de savoir qui a modifier la fonctions
-      ou les  lignes qui nous  intéresse. Cela permet  de s'oreinter
-      vers le bon groupe
-    \end{itemize}
+  Demander de l'aide à la communauté
+  \begin{itemize}
+  \item Le fichier \c{MAINTAINERS} contient la liste des mainteneur de
+    chaque sous-système
+  \item  Les entrées  commencant par  \texttt{L:} indique  des mailing
+    lists
+  \item Notons \email{linux-newbie@vger.kernel.org}
+  \item \c{MAINTAINERS}  liste aussi les sites  officiel, les fichiers
+    de  documentation,  etc...  pour  les  différents sous-projets  du
+    noyau
+  \item \c{git blame} permet de  savoir qui a modifier la fonctions ou
+    les lignes qui  nous intéresse. Cela permet de  s'oreinter vers le
+    bon groupe
+  \item Référence: \url{http://kernel.org/doc}
+  \end{itemize}
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{L'API non-stable}
@@ -372,6 +408,11 @@ Demander de l'aide à la communauté
     l'ensemble des driver utilisant l'ancienne API.
   \item  On préfère  souvent  laisser l'ancienne  et  la nouvelle  API
     cohabiter en demandant au mainteners de migrer vers la nouvelle
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{L'API non-stable}
+  \begin{itemize} 
   \item Il n'y  a pas de raisons de maintenir  un driver à l'extérieur
     du noyau, sauf les problèmes de licence
   \item  Il peut être  couteux en  temps d'intégré  un module  dans le
@@ -391,8 +432,9 @@ Demander de l'aide à la communauté
   \item La plupart des fonctions retournant des \c{int} retournent une
     valeur négative en cas d'erreur
   \item Les  valeurs retournée correspondent aux  inverses des erreurs
-    Posix  définis dans  \file{errno.h} (ie:  \c{-EAGAIN}). Référence:
-    \emph{errno(3)}
+    Posix  définis dans  \file{errno.h} (ie:  \c{-EAGAIN}). 
+  \item   Référence:   \emph{errno(3)},   \file{asm/errno-base.h}   et
+    \file{asm/errno.h}
   \item  Les  fonctions  renvoyant des  pointeurs  peuvent
     retourner NULL ou des valeurs spéciale en cas d'erreur
   \item Utiliser les macro \c{PTR_ERR}, \c{ERR_PTR} et \c{IS_ERR}
@@ -400,20 +442,25 @@ Demander de l'aide à la communauté
     n'avez pas de garde fou (bon, il  y a bien les Oops, mais ca n'est
     pas garanti)
   \item Référence \file{linux/err.h}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Gestion des erreurs}
+  \begin{itemize} 
   \item Vous devez systèmatiquement gérer les erreur retourner par les
     sous-fonctions  même  si  il  vous semble  impossible  qu'elle  se
     produise.
   \item Certaines pannes  matérielles peuvent amener des comportements
     qui paraissent  impossibles. Facilité le  travaille des débuggueur
     en détectant ce type d'erreur le plus tôt possible
-  \end{itemize}
-\end{frame}
-\begin{frame}[fragile=singleslide]{Gérer les erreurs}
-  \begin{itemize} 
   \item Lorsque vous gérez  une erreur, vous devez \emph{défaire} tout
     ce qui à déjà été fait
   \item Une manière commnue  de gérer les erreur d'initialisation dans
     le noyau est d'utiliser \c{goto}:
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Gérer les erreurs}
     \begin{lstlisting}
 ptr = kmalloc(sizeof(device_t));
 if (!ptr) {
@@ -432,34 +479,118 @@ err_init:
 err_alloc:
     return ret;
     \end{lstlisting} 
-  \end{itemize} 
 \end{frame} 
-
-
 
 \section{Notre premier device}
 
 
-\note{Il s'agit ici d'un gros morceau, mais il est traité en qqs slides}
+% Parler de l'historique
+%   /dev en statique
+%   On resrvait les mino et des major en global
+%   Puis plus devices
+%   Puis l'usb, le model statique ne tennais plus
+%   hotplug, udev et mdev, cf /proc/device et /sys/dev/{char,block}
+%   \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
-  \begin{itemize}
-  \item Voie classique pour un driver pour communiquer avec le noyau
-  \item Major, Minor
-    \begin{lstlisting}
-target% mknod my_chardev c <major> <minor>
-    \end{lstlisting}
-  \item Communication en écrivant/lisant des données
-    \begin{lstlisting}
-target% insmod my_chardev.ko
-target% echo toto > my_chardev
-target% cat my_chardev
-    \end{lstlisting}
-  \item Possibilité de faire un peu de configuration par les ioctl
+  \begin{itemize} 
+  \item Le seul moya de  communiquer depuis le userspace vers le noyau
+    passe par les appel systèmes.
+  \item  Il  s'agit  de placer  les  paramètres  sur  la piler  et  de
+    déclencher une  interruption logicielle particulière  (sur x86, il
+    s'agit         de          l'interruption         0x80,         ou
+    \c{sysenter}/\c{sysexit}).  Ainsi,  le noyau  reprend  la main  et
+    effectue  une action  en fonction  des paramètres  stockés  que la
+    pile.
+  \item Le  premier paramètre correspond au numéro  de l'appel système
+    (cf.  \emph{syscalls(2)}, \c{asm/unistd.h}).
+  \item Il y a environ 300  appels systèmes dans le noyau. Il est rare
+    d'ajouter de nouveau appels système et exeptionnel d'en modifer ou
+    d'en supprimer.
+  \item  Le  modèle Unix  consiste  à  limiter  le nombre  des  appels
+    systèmes et de tout gérer par l'intermédiaire de fichiers.
+  \item  Parmis  les  appels  systèmes  associés  aux  fichiers,  nous
+    trouvons \c{open}, \c{read},  \c{write}, \c{mmap}, \c{ioctl} (pour
+    modifier la configuration du périphérique), etc...
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
-  Exo: Faire un pipe avec un buffer:
+  \begin{itemize} 
+  \item Il  existe dans la  norme Unix des fichier  spéciaux, appellés
+    \emph{fichier devices}, dont les appels systèmes ne sont pas mappé
+    sur des fichiers réels mais sur des fonctions du noyau.
+  \item Un fichier  device est associé à deux  nombre, le \emph{major}
+    et le \emph{minor}.
+  \item On  spécifie ces deux nombres  lors de lors de  la création du
+    fichier avec la commande \c{mknod}:
+    \begin{lstlisting} 
+target% mknod my_device c 253 0
+target% ls -l my_device
+    \end{lstlisting} 
+  \item Il  est possible  de communiquer avec  les fichiers  device en
+    utilisant les outils standard
+    \begin{lstlisting} 
+target% cat my_device
+target% echo foo > my_device
+    \end{lstlisting} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+  \begin{itemize} 
+  \item Coté noyau, un driver  peut allouer une(des) entrée(s) dans la
+    table  des  device et  associé  des  fonctions  au appels  système
+    associé     à    cette    entrée     (cf.     \c{register_chrdev},
+    \c{struct file_operations} dans \c{linux/fs.h})
+  \item  En standard, tous  les fichiers  devices sont  regroupés dans
+    \file{/dev}.
+  \item  Autrefois,  les  numéro  de devices  étaient  normalisés  (cf
+    \file{Documentation/devices.txt})  et les fichiers  de \file{/dev}
+    était créés statiquement
+  \item Avec  l'augmentation du  nombre de périphériques  existants et
+    l'arrivé des bus  hotplugs tels que l'USB, ce  modèle n'était plus
+    tenable.  Il existe  donc  des système  d'allocation dynamique  de
+    numéro     de      devices     (cf.     \file{/proc/device}     et
+    \c{/sys/dev/\{char,block\}})     et    des     systèmes    créeant
+    automatiquement  les fichiers  nécessaires  (hotplug, udev,  mdev,
+    devtmpfs, etc...)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+  \begin{itemize} 
+  \item Il existe historiquement deux types de fichiers devices:
+    \begin{itemize}
+    \item  block: Pour  les  périphériques de  tailles  fixes à  accès
+      aléatoire. Principalement des périphériques de stockage.
+    \item  character: Pour  les  périphériques avec  des données  sous
+      forme de flux comme des ports séries.
+    \end{itemize} 
+  \item Cette différence est aujourd'hui de moins en moins évidente
+  \item Les cartes réseaux sont une exception notable de se modèle. Il
+    n'existe pas de  fichiers devices pour les cartes  réseau.  Il est
+    nécessaire d'utiliser des appels systèmes spécifiques.
+  \item Notons  aussi que de nos jours,  de nombreuses fonctionnalités
+    sont  accessibles  par  les  file  systems  virtuels  (\c{procfs},
+    \c{sysfs},   \c{debugfs},  etc...).   Ils   permettent  les   même
+    fonctionnalité que les fichier devices, mais sans leur complexité.
+  \end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Mémoire userspace}
+  Les fonction de la \c{struct file_operations} recoivent en paramètre
+  des  addresses  provenant   de  l'espace  d'addressge  du  processus
+  appellant. En  raison de la  séparation des espaces mémoire  (nous y
+  reviondrons lorsque  nous parlerons plus en  détail du fonctionnment
+  de la MMU), c'est addresses  ne peuvent pas être utiliée directement
+  dans  le  noyau. Il  est  est  nécessaire  d'utiliser les  fonctions
+  \verb+copy_from_user+ et \verb+copy_to_user+ pour y accèder.
+\end{frame}
+  
+%%%%%%%%% 
+
+\begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
+  Nous allons faire un driver permettant de faire un pipe avec un buffer:
   \begin{lstlisting}
 target% insmod my_chardev.ko
 target% echo toto > my_dhardev
@@ -468,32 +599,30 @@ toto
   \end{lstlisting}
 %% TODO: Présenter les différentes fonction ci-dessous
 \note{Motrer le code, décrire le contenu}
+  Nous utiliserons:
   \begin{itemize}
   \item \verb+copy_to_user+, \verb+copy_from_user+
   \item \verb+kcalloc+, \verb+kfree+
   \item \verb+register_chrdev+, \verb+unregister_chrdev_region+
-  \item   \verb+mutex_lock+,  \verb+mutex_unlock+,  \verb+mutex_init+,
-    \verb+mutex_destroy+
+  %\item   \verb+mutex_lock+,  \verb+mutex_unlock+,  \verb+mutex_init+,
+  %  \verb+mutex_destroy+
   \item \verb+memmove+
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
-   Vérifions votre comportement:
+   Vérifions le comportement:
    \begin{lstlisting}
 target% insmod my_chrdev.ko
 target% mknod my_chrdev c 251 0
 target$ for i in {1..64}; echo "$i " > my_chrdev
 target$ cat my_chrdev
 target% rmmod my_chrdev
-target% insmod my_chrdev.ko buf_size=2
-target$ echo foo > /dev/my_chrdev
-target$ cat /dev/my_chrdev
-target% rmmod my_chrdev
-target% insmod my_chrdev.ko buf_size=-1
     \end{lstlisting} % $
 \end{frame}
  
+%%% Ajouter ici une demo avec le sioctl. Un ioctl qui renvoye le nombre de byte restant à lire dans le buffer.
+
 % \begin{frame}{Les ioctls}
 %   C'est un appel système qui permet de faire passer une structure
 %   quelconque à un device.\\
