@@ -1,13 +1,17 @@
+#
+# Licence: GPL
+# Created: 2012-04-02 11:52:35+02:00
+# Main authors:
+#     - Jérôme Pouiller <jezz@sysmic.org>
+#
 
 obj-m := mod5_irq.o
+
 KDIR ?= /lib/modules/$(shell uname -r)/build
 
-default:
-	$(MAKE) -C $(KDIR) SUBDIRS=$(shell pwd) modules
+default: modules
+install: modules_install
 
-install:
-	$(MAKE) -C $(KDIR) SUBDIRS=$(shell pwd) modules_install
-
-clean:
-	$(RM) -f *.[oas] .*flags *.ko .*.cmd .*.d .*.tmp *.mod.c
+modules modules_install help clean:
+	$(MAKE) -C $(KDIR) M=$(shell pwd) $@
 

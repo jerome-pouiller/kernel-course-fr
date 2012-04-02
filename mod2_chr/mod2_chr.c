@@ -5,7 +5,9 @@
 #include <linux/mutex.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
-#include <asm/uaccess.h>
+#include <linux/ioctl.h>
+#include <linux/uaccess.h>
+#include "mod2_chr.h"
 
 static int major = 0;
 static int buf_size = 255;
@@ -40,22 +42,23 @@ static ssize_t m_write(struct file *file, const char *user_buf, size_t count, lo
     return count;
 }
 
-// FIXME: is usefull?
-static int m_open(struct inode *inode, struct file *file) {
-  return 0;
+static long m_ioctl(struct file *file, unsigned int nr, unsigned long arg) {
+	if (nr == FIFO_GET_LEN) {
+		int ret = 0;
+		struct m_arg a;
+		a.sz = idx;
+		ret = copy_to_user(&a, (void *) arg, sizeof(a));
+		return ret;
+	}
+	return -EINVAL;
 }
 
-static int m_release(struct inode *inode, struct file *file) {
-  return 0;
-}
 
 static struct file_operations m_fops = {
-  .owner   = THIS_MODULE,
-  .read    = m_read,
-  .write   = m_write,
-//  .ioctl   = m_ioctl,
-  .open    = m_open,
-  .release = m_release,
+  .owner          = THIS_MODULE,
+  .read           = m_read,
+  .write          = m_write,
+  .unlocked_ioctl = m_ioctl,
 };
 
 static int __init m_init(void) {

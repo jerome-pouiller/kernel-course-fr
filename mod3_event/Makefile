@@ -5,7 +5,7 @@
 #     - Jérôme Pouiller <jezz@sysmic.org>
 #
 
-obj-m := mod4_mmio.o
+obj-m := mod3_event.o
 
 KDIR ?= /lib/modules/$(shell uname -r)/build
 

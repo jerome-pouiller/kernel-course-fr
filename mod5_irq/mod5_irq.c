@@ -15,23 +15,30 @@ struct my_dev_s {
 
 struct my_dev_s my_dev;
 
+void doit(unsigned long unused) {
+	pr_info("Interrupt: Bottom-Half\n");
+}
+
+DECLARE_TASKLET(doit_tasklet, doit, 0);
+
 static irqreturn_t handler(int irq, void *dev) {
-   pr_info("Interrupt\n");
-   return IRQ_HANDLED;
+	pr_info("Interrupt: Top-Half\n");
+	tasklet_schedule(&doit_tasklet);
+  
+	return IRQ_HANDLED;
 }
 
 static int __init m_init(void) {
-  int ret;
- 
-  ret = request_irq(gpio_to_irq(AT91_PIN_PB10), handler, IRQF_SHARED, "my interruption handler", &my_dev);
-  //enable_irq(gpio_to_irq(AT91_PIN_PB10));
-
-  pr_info("my_chardev: registered\n");
-  return 0;
+	int ret;
+	
+	ret = request_irq(gpio_to_irq(AT91_PIN_PB10), handler, IRQF_SHARED, "my_int", &my_dev);
+	//enable_irq(gpio_to_irq(AT91_PIN_PB10));
+	
+	return ret;
 }
 
 static void __exit m_exit(void) {
-  free_irq(gpio_to_irq(AT91_PIN_PB10), &my_dev);
+	free_irq(gpio_to_irq(AT91_PIN_PB10), &my_dev);
 }
 
 module_init(m_init);

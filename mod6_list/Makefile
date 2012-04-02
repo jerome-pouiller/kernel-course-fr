@@ -5,13 +5,13 @@
 #     - Jérôme Pouiller <jezz@sysmic.org>
 #
 
-obj-m := mod4_mmio.o
+obj-m := mod6_list.o
 
 KDIR ?= /lib/modules/$(shell uname -r)/build
 
 default: modules
 install: modules_install
 
-modules modules_install help clean:
+modules modules_install help clean distclean:
 	$(MAKE) -C $(KDIR) M=$(shell pwd) $@
 

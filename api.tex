@@ -626,6 +626,7 @@ int kthread_stop(struct task_struct *k)
   \end{itemize}
 \end{frame}
 
+% A remonter après les char device
 \section{Les Wait Queues}
 
   % Wait_event
@@ -650,8 +651,7 @@ int kthread_stop(struct task_struct *k)
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Les Wait Queues}
-  \begin{itemize} 
-  \item Pour attendre un évènement:
+  Pour attendre un évènement:
     \begin{itemize} 
     \item Attend  un evenement sur la  queue ET que  la condition soit
       vérifiée
@@ -675,11 +675,14 @@ void wait_event_timeout(queue, condition);
       \end{lstlisting} 
     \item \c{wait_event_timeout} + \c{wait_event_interruptible}:
       \begin{lstlisting} 
-void  wait_event_tinterruptible_imeout(queue, condition);
+void  wait_event_tinterruptible_timeout(queue, condition);
       \end{lstlisting} 
-    \end{itemize} 
-  \item Pour réveiller les tâches en attentes
-    \begin{itemize} 
+    \end{itemize}    
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Les Wait Queues}
+  Pour réveiller les tâches en attentes
+    \begin{itemize}
     \item Réveil tous les processus en attente sur la queue
       \begin{lstlisting} 
 wait_up(queue); 
@@ -689,7 +692,6 @@ wait_up(queue);
 wait_up_interruptible(queue);
       \end{lstlisting} 
     \end{itemize}
-  \end{itemize}  
 \end{frame} 
 
 \section{Les DMA}
@@ -874,7 +876,7 @@ kfifo_is_empty(fifo)
 \begin{frame}{Mutex}
   Précaution classique à l'utilisation des sections critiques:
   \begin{itemize}
-  \item Acquérir le mutex le plus tard possible, Relacher le plus tôt
+  \item Acquérir le mutex le plus tard possible, Relâcher le plus tôt
   \item Etudier la granularité nécessaires aux sections critiques
   \item   Attention  aux   bug  classiques:   latences,   dead  locks,
     inversement de priorités
@@ -889,7 +891,7 @@ kfifo_is_empty(fifo)
 DEFINE_MUTEX(name);
 void mutex_init(struct *mutex);
     \end{lstlisting} 
-  \item  Acquierrir   le  mutex.  Attention,  si   appellé  depuis  un
+  \item  Acquérir   le  mutex.  Attention,  si   appelé  depuis  un
     processus,     celui-ci     ne      peut     plus     être     tué
     \begin{lstlisting} 
 mutex_lock(struct mutex *lock);
@@ -925,7 +927,7 @@ Dans la même branche, le noyau propose aussi:
 \begin{itemize} 
 \item Des sémaphores (référence: \file{linux/semaphore.h})
 \item Des \emph{Read-Write Lock} (référence: \file{linux/rw\_semaphore.h})
-\item  Mutex avec protocole  d'héritage de  prioritée et  détection de
+\item  Mutex avec protocole  d'héritage de  priorités et  détection de
   deadlock           (aka           \c{rt_mutex})          (référence:
   \file{Documentation/rt-mutex-design.txt}, \file{linux/rtmutex.h})
 \item  Les   \c{rtmutex}  peuvent  être  utilisé   par  la  \c{libpthread}
@@ -938,13 +940,13 @@ Dans la même branche, le noyau propose aussi:
   \begin{itemize} 
   \item  Lors de  certains  accès, les  mécanismes  de protections  de
     ressources inter-tâche ne sont plus suffisants.
-  \item   Cela   peut  concerner   des   accès   concurant  avec   des
+  \item   Cela   peut  concerner   des   accès   concurrent  avec   des
     interruptions.
   \item  Il  est alors  nécessaire  de  désactiver temporairement  les
     interruptions afin de garantir que l'on ne sera pas interrompu.
   \item   Ces fonctions sont à utiliser avec parcimonie:
     \begin{itemize} 
-    \item  Sauve/restore  l'état  des  interuptions dans/de  flags  et
+    \item  Sauve/restore  l'état  des  interruptions dans/de  flags  et
       désactive les interruptions:
       \begin{lstlisting} 
 local_irq_save(unsigned long flags);
@@ -978,13 +980,13 @@ preempt_enable();
 \begin{frame}[fragile=singleslide]{Spin Lock}
   Dans certains cas, une tâche peut avoir besoin d'un accès exclusif à
   une ressource  potentiellement utilisée dans  une interruption. Dans
-  ca cas,  il est  necessaire de désactiver  les interruption  lors de
+  ce cas,  il est  nécessaire de désactiver  les interruption  lors de
   l'accès à la ressource.   Néanmoins, l'interruption peut se produire
-  sur un  autre CPU.   Il est alors  nécessaire de se  protèger contre
+  sur un  autre CPU.   Il est alors  nécessaire de se  protéger contre
   cette éventualité
   \begin{itemize} 
   \item Il s'agit d'une attente active sur une section critique
-  \item Ne traite pas les  problème de concurence mais de parallèlisme
+  \item Ne traite pas les  problème de concurrence mais de parallélisme
     uniquement. Par conséquent, uniquement en environnement SMP
   \item   Principalement  utilisé   lors  de   en  complément   de  la
     désactivation des interruption
@@ -1091,7 +1093,7 @@ void write_a() {
     réordonnancant les instructions.
   \item Le compilateur et le  CPU ne réordonnance que les instructions
     indépendantes (donc, a priori, sans danger)
-  \item Ce comportement peut  nénamoins introduire des erreurs sur les
+  \item Ce comportement peut  néanmoins introduire des erreurs sur les
     système SMP ou lors d'accès à certains périphériques.
   \item  Il est  assez complexe  de savoir  ou doivent  se  placer les
     barrières. Elle interviennent néanmoins dans un certains nombre de
