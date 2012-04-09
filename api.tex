@@ -19,6 +19,46 @@
   \tableofcontents[currentpart]
 \end{frame}
 
+\section{Les frameworks}
+
+\begin{frame}[fragile=singleslide]{Les frameworks}
+  \begin{itemize} 
+  \item Le noyau est divisé en frameworks.
+  \item  Pour  bien  utiliser  un  framework,  il  est  nécessaire  de
+    comprendre le fonctionnement du noyau et de la technologie décrite
+    par le framework.
+  \item Un  framework est généralement décrit dans  son fichier \c{.h}
+    (exemple: \file{linux/usb.h}).
+  \item  Un framework  contient  généralement une  paire de  fonctions
+    \texttt{register}/\c{unregister}   permettant  au  driver   de  se
+    déclarer auprès du framework (Exemple: \c{usb_register_driver})
+  \item La  fonction \texttt{register} prend souvent  en paramètre une
+    structure contenant des pointeurs  sur des callbacks appelées lors
+    des divers  évènements pouvant se produire  (exemple: la structure
+    \c{usb_driver})
+  \item Parmi les callbacks, il y a souvent une fonction \c{probe}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Les frameworks}
+  \begin{itemize} 
+  \item  Les extensions  de gcc  sont utilisées  pour  initialiser ces
+    structures avec les attributs nommés
+  \item  Un framework  fourni aussi  d'autres fonctions  permettant de
+    lancer des actions (exemple: \c{usb_submit_urb})
+  \item Un  framework peut raffiner  un framwork plus générique  (en le
+    ``proxifiant'')   (exemple:  les   framework  usb\_serial   et  le
+    framework usb)
+  \item Une driver peu appartenir à plusieurs frameworks. Par exemple,
+    un  driver de  carte réseau  peut  utiliser le  framework pci,  le
+    framework, network\_device, sysfs, debugfs, etc...
+  \item    Il     existe    un    framework     pour    les    modules
+    (\file{linux/modules.h}) accessible avec \c{THIS_MODULE}
+  \item  Un  exemple  de   framework  simple  enrobant  les  \emph{char
+      devices}: \c{include/linux/cdev.h}
+  \end{itemize}
+\end{frame} 
+
 \section{Les fonctions inspirés de la libc}
 
 \begin{frame}{Fonctions standards de \file{string.h}}
@@ -27,14 +67,14 @@
   \item   Comparaisons:   \c{strcmp},   \c{strncmp},   \c{strcasecmp},
     \c{strncasecmp}, \c{ strnicmp}, \c{memcmp}, \c{strstarts}
   \item Recherches:  \c{strchr}, \c{strnchr}, \c{memchr}, \c{memscan},
-    \c{strrchr},  \c{memchr_inv}, c{strspn},  \c{strcpsn}, \c{strstr},
+    \c{strrchr},  \c{memchr_inv}, \c{strspn},  \c{strcpsn}, \c{strstr},
     \c{strnstr}, \c{strpbrk}
   \item  Copies:   \c{strcpy},  \c{strncpy},  \c{memcpy},  \c{strcat},
     \c{strncat}, \c{strsep}
   \item \c{strlcpy}  et \c{strlcat} (De  meilleures implémentations de
     \c{strncat} et \c{strncpy}). Toujours utiliser ces fonctions.
   \item \c{skip_spaces},  \c{strim}, \c{strstrip}: Supprime  les blanc
-    en début et fin de chaine
+    en début et fin de chaîne
   \end{itemize}
 \end{frame}
 
@@ -52,7 +92,7 @@
   \item  Utilitaire  sur  les  nombres:  \c{max},  \c{max3},  \c{min},
     \c{min3}, \c{clamp}, \c{swap}
   \item   Notez  que   beaucoup   de  ces   fonctions  possèdent   des
-    implémentations  générique   mais  peuvent  être   surchargée  par
+    implémentations  génériques  mais  peuvent  être  surchargées  par
     architecture
   \item Référence: \file{linux/string.h} \file{linux/kernel.h}
   \end{itemize}
@@ -61,7 +101,7 @@
 \section{Accéder au E/S}
 
 \begin{frame}[fragile=singleslide]{Au sujet des accès aux E/S}
-  La méthode d'accès dépend de l'architecture:
+  La méthode d'accès aux E/S dépend de l'architecture:
   \begin{itemize} 
   \item \emph{Memory Mapped Input  Output (MMIO)}: Registres mappés en
     mémoire.  Il suffit  de lire et écrire à  une adresse particulière
@@ -72,8 +112,8 @@
     \c{out}).  Cas notable de l'architecture x86.
   \end{itemize}
 
-  On  déclare rarement  les  adresses des  péiphéirque  en absolu.  On
-  préfèrera définir les offsets à partir d'une base:
+  On déclare  rarement les adresses  des périphériques en  absolu.  On
+  préférera définir les offsets à partir d'une base:
   \begin{lstlisting}
 outb(base_device + REGISTER, 1);
   \end{lstlisting} 
@@ -92,17 +132,17 @@ struct ressource *request_region(unsigned long start, unsigned long len, char *n
 void release_region(unsigned long start, unsigned long len);
     \end{lstlisting} 
   \item Référence: \c{linux/ioport.h}
-  \item  Permet d'éviter que  deux drivers  essayent de  referencer la
+  \item  Permet d'éviter que  deux drivers  essayent de  référencer la
     même plage de ports.
   \item  Il  est  possible  d'avoir  des  information  sur  les  ports
     actuellement utilisés en lisant le fichiers \file{/proc/ioports}
   \item Une fois réservé, il est possible de lire/écrire sur les ports
     avec :
-\begin{lstlisting} 
+    \begin{lstlisting} 
 u\{8,16,32\} in\{b,w,l\}(int port);
 void out\{b,w,l\}(u\{8,16,32\} value, int port);
-\end{lstlisting} 
-  \item Ces  fonction s'occuppe  de convertir les  donnée dans  le bon
+    \end{lstlisting} 
+  \item Ces fonctions s'occupent de  convertir les données dans le bon
     endian
   \item Référence: \c{asm/io.h}
   \end{itemize} 
@@ -123,13 +163,13 @@ void release_mem_region(unsigned long start, unsigned long len)
 void *ioremap(unsigned long phys_add, unsigned long size)
 void iounmap(unsigned long phys_addr)
     \end{lstlisting}  
-  \item Ces fonctions s'occuppent de la cohérence avec le cache.
+  \item Ces fonctions s'occupent de la cohérence avec le cache.
 \end{itemize} 
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Fonctionnement en MMIO}
   \begin{itemize} 
-\item  Sur les  architectures  simples, il  possible de  directement
+  \item  Sur les  architectures  simples, il  possible de  directement
     déréférencer le résultat de  \c{ioremap}.  Il existe néanmoins des
     fonctions apportant  une couche d'abstraction  (barrières mémoire,
     etc...).
@@ -137,49 +177,53 @@ void iounmap(unsigned long phys_addr)
 u{8,16,32,64} read{b,w,l,q}(void *addr)
 void write{b,w,l,q}(u{8,16,32,64}, void *addr)
     \end{lstlisting} 
-  \item  Vous devez  utilisez  ces  fonctions: les  addr  ne sont  pas
-    volatiles, write et  read s'occuppe de placer des  barrières et ou
-    d'avoir des accès  ``volatiles'', il peut y avoir  des problème de
-    SMP  ou   de  préemption  gérer  par  write   et  read,  certaines
-    architecture e  support pas  l'acces direct à  la mémoire,  il est
-    plus facile pour sparse de détecter des erreur
-  \item Cas notable des accès PCI (little endian obligatoire)
+  \item Vous  devez utilisez ces  fonctions: 
+    \begin{itemize} 
+    \item les adresses ne sont pas volatiles
+    \item \c{write} et \c{read}  s'occupent de placer des barrières et
+      ou d'avoir des accès ``volatiles''
+    \item il peut y avoir des  problèmes de SMP ou de préemption gérés
+      par \c{write} et \c{read}
+    \item certaines  architectures ne supportent pas  l'accès direct à
+      la mémoire
+    \item il est plus facile pour sparse de détecter des erreur
+    \item Cas notable des accès PCI (little endian obligatoire)
+    \end{itemize}
   \end{itemize} 
 \end{frame} 
 
 
 \begin{frame}[fragile=singleslide]{Accèder aux IO en userspace}
   \begin{itemize} 
-  \item  Le   device  \c{/dev/mem}  est  un   fichier  fichier  device
-    permettant d'accèder aux addresses physiques.
+  \item  \c{/dev/mem}   est  un  fichier   fichier  device  permettant
+    d'accèder aux adresses physiques.
   \item Il est possible d'utiliser \c{mmap} sur ce fichier et d'écrire
-    aux addresses occuppées par des périphériques
-  \item Sur les architecture utilisant PIO, il est possible de demande
-    au  noyau  de  laisser   un  processus  utilisateur  utiliser  les
-    instruction  assembleurs  \c{out*} et  \c{in*}  pour qu'il  puisse
-    accèder aux périphérique avec \c{ioperm} et \c{iopl}.
-  \item C'est  ainsi que fonctionne les serveurx  graphques XFree86 ou
+    aux adresses occupées par des périphériques
+  \item  Sur  les architectures  utilisant  PIO,  il  est possible  de
+    demander au noyau de laisser un processus utilisateur utiliser les
+    instruction assembleurs  \c{out*} et \c{in*}  pour qu'ils puissent
+    accéder aux périphérique avec \c{ioperm} et \c{iopl}.
+  \item C'est ainsi que  fonctionne les serveurs graphiques XFree86 ou
     xorg
   \end{itemize} 
 \end{frame} 
-
 
 \section{Allouer de la memoire}
 
 \begin{frame}[fragile=singleslide]{Quelques notions}
   \begin{itemize}       
-  \item Addresses physiques: Addresses physique de la mémoire
-  \item Addresses virtuelles: Addresses convertie par le MMU
-  \item Addresses  logiques: Addresses  dans l'espace du  noyau mappée
-    linéairement sur les addresse physiques
+  \item Adresses physiques: Adresses physiques de la mémoire
+  \item Adresses virtuelles: Adresses converties par le MMU
+  \item  Adresses logiques:  Adresses  dans l'espace  du noyau  mappée
+    linéairement sur les adresses physiques
     \begin{itemize} 
-    \item Elles pouvent être  converties en addresses physiques par un
-      simple shifting.
-    \item Les addresse logique sont des addresse virtuelles
-    \item  Sur les  architecture  32bits, les  adresses logiques  sont
+    \item  Elles  peuvent être  converties  en  adresses physiques  en
+      appliquant un simple masque de bits
+    \item Les adresses logiques sont des adresses virtuelles
+    \item  Sur les  architectures 32bits,  les adresses  logiques sont
       placées entre \texttt{0xC0000000} (3Go) et \texttt{0xFFFFFFFF}
     \item Il est toutefois possible de modifier ce parametrage
-    \item Il est possible de convertir une adresse logique en addresse
+    \item Il est possible de convertir une adresse logique en adresse
       physique avec la macro \c{__pa}
     \item ... et faire l'inverse avec la macro \c{__va}
     \end{itemize} 
@@ -188,21 +232,17 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
 
 \begin{frame}[fragile=singleslide]{Quelques notions}
   \begin{itemize} 
-  \item  Mémoire  basse (\emph{Low  Memory}):  Partie de  l'addressage
-    virtuel contenant les addresses logiques. (voir \c{/proc/kallsyms}
+  \item  Mémoire  basse  (\emph{Low  Memory}): Partie  de  l'adressage
+    virtuel contenant les  adresses logiques. (voir \c{/proc/kallsyms}
     en root)
-  \item Mémoire  haute (\emph{High Memory}): Le  reste de l'addressage
+  \item Mémoire  haute (\emph{High  Memory}): Le reste  de l'adressage
     virtuel
   \item \emph{Out Of Memory (OOM) killer}: Mécanisme déclenché lorsque
-    le  système  ne peut  plus  founir de  mémoire.  Dans  ce cas,  un
-    processus  est désignée  pour  être \emph{killé}.  Il s'agit  d'un
+    le  système ne  peut plus  fournir de  mémoire.  Dans  ce  cas, un
+    processus  est désignée  pour être  \emph{killé}.  Il  s'agit d'un
     algorithme heuristique
   \end{itemize}     
 \end{frame} 
-% Il existe aussi : phys_to_virt, virt_to_phys, page_to_virt, phys_to_page, page_to_phys, 
-% pfn_to_page, page_to_pfn
-% Le passage paddr -> pfn: (paddr) >> PAGE_SHIFT
-% Le passage pfn -> paddr: (pfn) << PAGE_SHIFT
 
 \begin{frame}[fragile=singleslide]{Les pages}
   Les pages sont l'unité de gestion du MMU. 
@@ -211,14 +251,14 @@ void write{b,w,l,q}(u{8,16,32,64}, void *addr)
     courante
   \item Une page fait 4 à 8Ko.
   \item \emph{Page Frame  Number (PFN)} Le numéro de  la page. Ce sont
-    en fait les bit de poids fort des addresses.
+    en fait les bits de poids fort des adresses.
   \item  Il  est  facile  de  convertir les  pages  en  \emph{pfn}  et
     inversement avec \c{page_to_pfn}  et \c{pfn_to_page} (correspond à
-    \c{phys_addr >> PAGE_SHIFT} et \c{pfn << PAGE_SHIFT})
-  \item Il est possible d'obtenir l'addresse virtuelle d'une page avec
+    \c{page - CST} et \c{pfn + CST})
+  \item Il est possible  d'obtenir l'adresse virtuelle d'une page avec
     la  macro  \c{page_address}  (si  elle est  mappée  dans  l'espace
-    d'addressage du noyau)
-  \item ... l'inverse est possible avec \c{virt_to_page}
+    d'adressage du noyau)
+  % \item ... l'inverse est possible avec \c{virt_to_page}
   \end{itemize}
 \end{frame}
 
@@ -235,9 +275,9 @@ void __free_pages(struct page *page, unsigned int order);
   \item  \c{order} indique  le nombre  de  pages à  allouer. Le  noyau
     alloue $2^{order}$ pages
   \item  \c{int  get_order(unsigned  long  size)}  retourne  \c{order}
-    nécessaire pour avoir \c{size} octets de memoire
+    nécessaire pour avoir \c{size} octets de mémoire
   \item Il  existe des  raccourcis pour allouer  une nouvelle  page et
-    obtenir son addresse:
+    obtenir son adresse:
     \begin{lstlisting} 
 unsigned long get_zeroed_page(int flags);
 unsigned long __get_free_page(int flags);
@@ -245,7 +285,7 @@ unsigned long __get_free_pages(int flags, unsigned long order);
 void free_page(unsigned long addr);
 void free_pages(unsigned long addr, unsigned long order);
     \end{lstlisting} 
-  \item Référence: \c{linux/gfp.h}, \c{/proc/meminfo}
+  \item Référence: \file{linux/gfp.h}, \file{/proc/meminfo}
   \item Il est  possible d'allouer des zones de  mémoires plus petites
     en utilisant le \c{slab} ou \c{vmalloc}
   \end{itemize} 
@@ -253,13 +293,13 @@ void free_pages(unsigned long addr, unsigned long order);
 
 \begin{frame}[fragile=singleslide]{Le Slab}
   \begin{itemize} 
-  \item  Le   slab  est  l'allocateur  de  mémoire   du  noyau.  C'est
+  \item  Le   Slab  est  l'allocateur  de  mémoire   du  noyau.  C'est
     l'équivalent de l'allocateur de la libc.
   \item Il existe des alternatives telles que le Slub ou le Slob
   \item Il gère des \emph{pool} d'espace mémoire. 
-  \item Il est possible d'obtenir  des informations sur l'état du slab
-    en lisant le fichier \cmd{/proc/slabinfo}
-  \item  Il est  possible d'allouer  et  de désallouer  des espace  de
+  \item Il est possible d'obtenir  des informations sur l'état du Slab
+    en lisant le fichier \file{/proc/slabinfo}
+  \item  Il est  possible d'allouer  et  de désallouer  des espaces  de
     mémoire avec le Slab en utilisant:
     \begin{lstlisting} 
 void *kmalloc(size_t size, gfp_t flags);
@@ -272,25 +312,25 @@ void kfree(const void *objp);
     \begin{lstlisting} 
 void *krealloc(const void *p, size_t new_size, gfp_t flags);
     \end{lstlisting} 
-  \item Sauf mention contraire, le Slab retourne des addresse logiques
+  \item Sauf mention contraire, le Slab retourne des adresse logiques
   \item Dans tous les cas, le Slab retourne de la mémoire physiquement
-    contigüe
-  \item Référence: \c{linux/slab.h}
+    contiguë
+  \item Référence: \file{linux/slab.h}
   \end{itemize} 
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Création de \emph{pool} dans le Slab}
   Si vous avez  de grande quantité d'objets identiques  à gérer, ou si
-  vous avez des besoins spécifique, vous pouvez créer un pool
-  spécialement pour vos besoins.\\[2ex]
-
-  Le cas échént, il est  même possible d'utiiser vos propres fonctions
-  d'allocation:
+  vous  avez  des  besoins  spécifiques,  vous pouvez  créer  un  pool
+  spécialement pour vos besoins.
+  \\[2ex]
+  Le  cas  échéant,  il  est  même  possible  d'utiliser  vos  propres
+  fonctions d'allocation:
   \begin{lstlisting} 
 mempool_t *mempool_create(int min_nr, mempool_alloc_t *alloc_fn, mempool_free_t *free_fn, void *data);
 void mempool_destroy(mempool_t *pool);
   \end{lstlisting} 
-  Vous pouvez garder la politique d'allocation par défaut en
+  Vous  pouvez   garder  la  politique  d'allocation   par  défaut  en
   utilisant:
   \begin{lstlisting} 
 void *mempool_alloc(mempool_t *pool, int gfp_mask);
@@ -305,8 +345,8 @@ void mempool_free(void *element, mempool_t *pool);
   \begin{itemize} 
   \item \c{GFP_KERNEL}: Standard
   \item  \c{GFP_USER}: De  la  mémoire  destinée à  être  donnée à  un
-    processus utilisateur.  Elle est alors bien  séparé pages allouées
-    pour le noyau.
+    processus  utilisateur.  Elle  est  alors bien  séparée des  pages
+    allouées pour le noyau.
   \item \c{GFP_HIGHUSER}:  Indique en plus que  l'allocation doit être
     faite dans la mémoire haute
   \item  \c{GFP_ATOMIC}:  L'allocateur  ne  peux  pas  bloquer  durant
@@ -321,7 +361,7 @@ void mempool_free(void *element, mempool_t *pool);
 
 \begin{frame}[fragile=singleslide]{vmalloc}
   \begin{itemize} 
-  \item Il est possible d'allouer de la mémoire non-contigüe avec
+  \item Il est possible d'allouer de la mémoire non-contiguë avec
     \c{vmalloc}:
     \begin{lstlisting} 
 void *vmalloc(unsigned long size);
@@ -329,27 +369,60 @@ void *vzalloc(unsigned long size);
 void vfree(void *addr);
     \end{lstlisting} 
   \item Alloue dans la mémoire haute
-  \item ...  ainsi la mémoire allouée  peut être non  contigüe dans la
+  \item ...  ainsi la mémoire allouée  peut être non  contiguë dans la
     mémoire physique
   \item  Il  est ainsi  possible  d'allouer  d'importante quantité  de
     mémoire.
-  \item Référence: \c{linux/vmalloc.h}, \c{mm/vmalloc.c}, \c{/proc/vmallocinfo}
+  \item    Référence:   \file{linux/vmalloc.h},   \file{mm/vmalloc.c},
+    \file{/proc/vmallocinfo}
   \end{itemize} 
 \end{frame}
+
+\begin{frame}[fragile=singleslide]{Conversions}
+  Il est possible de faire des conversions en utilisant:
+  \begin{itemize} 
+  \item \c{phys_to_virt}  et \c{virt_to_phys} (qui  appellent \c{__pa}
+    et \c{__va} si possible)
+  \item   \c{page_to_virt},   \c{virt_to_page},  \c{phys_to_page}   et
+    \c{page_to_phys} (qui appellent \c{page_address})
+  \item \c{pfn_to_page} et \c{page_to_pfn}
+  \end{itemize}
+\end{frame}
+% Le passage paddr -> pfn: (paddr) >> PAGE_SHIFT
+% Le passage pfn -> paddr: (pfn) << PAGE_SHIFT
 
 \section{La MMU}
 
 \begin{frame}[fragile=singleslide]{La mémoire des processus}
   \begin{itemize} 
+  \item  Copier  des   données  depuis/vers  l'espace  d'adressage  du
+    processus courant:
+    \begin{lstlisting} 
+int copy_from_user(kern_buf, user_buf, size);
+int copy_to_user(user_buf, kern_buf, size);
+    \end{lstlisting} 
+  \item Retourne le nombre d'octets non copiés
+  \item  Lire/affecter  une  variable  simple (jusqu'à  8  octets)  de
+    l'espace d'adressage du processus courant:
+    \begin{lstlisting} 
+get_user(var, user_ptr);
+put_user(var, user_ptr);
+    \end{lstlisting} 
+  \item  La taille de \c{var} est automatiquement calculée
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{La mémoire des processus}
+  \begin{itemize} 
   \item La variable \c{current} pointe sur le processus courant
   \item Chaque processus possède une table de mapping mémoire
-  \item Le mapping du processus courant se trouve dasn \c{current->mm}
+  \item Le mapping du processus courant se trouve dans \c{current->mm}
     \begin{itemize} 
     \item  \c{current->mm->rb_tree} contient des  \emph{virtual memory
         area (vma)} sous la forme d'un arbre rouge-noir
     \item     Il    est     possible     d'utiliser    la     fonction
       \c{find_vma(mm, addr)} pour retrouver une VMA
-    \item  allouer de  la  memoire consiste  à  allouer une  structure
+    \item  allouer de  la  mémoire consiste  à  allouer une  structure
       \c{vm_area_struct} et l'ajouter dans l'arbre rouge-noir
     \item Le  noyau parle  ensuite \emph{to pin}  une page  en mémoire
       lorsque celle-ci doit être réellement allouée
@@ -362,10 +435,10 @@ void vfree(void *addr);
   \end{itemize} 
 \end{frame} 
 
-\begin{frame}[fragile=singleslide]{Mapper des addresse physiques}
+\begin{frame}[fragile=singleslide]{Mapper des adresse physiques}
   Parmi les  fonctions les plus utiles,  \c{remap_pfn_range} permet de
-  mapper des  addresses physique dans un espace  utilisateur. Elle est
-  particulièrement utile pour implémentér l'appel \c{mmap}:
+  mapper des  adresses physiques dans un espace  utilisateur. Elle est
+  particulièrement utile pour implémenter l'appel \c{mmap}:
   \begin{lstlisting} 
 int remap_pfn_range(
   struct vm_area_struct *vma,
@@ -375,27 +448,27 @@ int remap_pfn_range(
   pgprot_t flags);    
   \end{lstlisting} 
   \begin{itemize}
-  \item  \c{vma} Espace  d'addressage virtuel  dans lequel  le mapping
+  \item  \c{vma} Espace  d'adressage virtuel  dans lequel  le mapping
     doit s'effectuer. Dans le cadre de mmap, fournie par le kernel.
-  \item \c{addr} L'addresse à l'intérieur de \c{vma} (=offset)
+  \item \c{addr} L'adresse à l'intérieur de \c{vma} (=offset)
   \item \c{pfn} La page physique à mapper     
-  \item \c{size} Taille de l'interval à mapper 
+  \item \c{size} Taille de l'intervalle à mapper
   \item \c{flags} Flags éventuels (reprendre \c{vma->vm_page_prot})
   \end{itemize} 
 
   Il     est    aussi     possible     de    surcharger     l'attribut
   \c{vm_operations_struct *  vm_ops} de la  \c{vm_area_struct} afin de
   gérer soit même les différentes exceptions. Peut-être utile pour le
-  développement de certains drivers (good luck) \\[2ex]
-
+  développement de certains drivers (good luck) 
+  \\[2ex]
   Référence: \file{linux/mm.h}
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Sparse}
   \begin{itemize} 
   \item Sparse est un outils spécifique au noyau
-  \item Sparse parse le code et interprète certain attribut on définit
-    lors de la compilation avec \cmd{gcc}
+  \item  Sparse parse  le code  et interprète  certains  attributs non
+    définis lors de la compilation avec \cmd{gcc}
   \item \c{bitwise} indique que deux  types ne peuvent pas être castés
     (exemple: \c{phys_addr_t} et \c{long unsigned})
   \item  \c{address_space(NUM)} précise  le domaine  d'un  pointeur et
@@ -428,7 +501,7 @@ int request_irq(
   \end{lstlisting} 
   \begin{itemize} 
   \item \c{irq}: Le numéro de l'IRQ
-  \item \c{handler} La fonction à appeller.
+  \item \c{handler} La fonction à apeller.
   \item \c{flags} Principalement : 
     \begin{itemize} 
     \item \c{IRQF_SHARED} : L'interruption peut être partagé
@@ -436,7 +509,7 @@ int request_irq(
   \item \c{devname}: Un descriptif pour \c{/proc/interrupts}
   \item  \c{dev_id}:   Pointeur  qui   sera  passé  en   paramètre  de
     \c{handler}. On utilise généralement un pointeur sur une structure
-    decrivant l'instance du device. Ce pointeur à aussi son importance
+    décrivant l'instance du device. Ce pointeur à aussi son importance
     lors de la libération de l'interruption.
   \end{itemize}
 \end{frame}
@@ -470,20 +543,21 @@ void disable_irq(unsigned int irq)
   n'expliquons  pas spécifiquement  ici comment  développer  un driver
   pour un PIC.
 
-  Référence:  \c{linux/interrupts.h}
+  Référence:  \file{linux/interrupts.h}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Les handlers d'interruption}
-  Les handler d'interruption:
+  Les gestionnaires (\emph{handlers})  d'interruption:
   \begin{itemize} 
   \item Il est de type \c{irqreturn_t (*)(int irq, void *dev_id)}
   \item Il doit retourner (\c{irqreturn_t})
     \begin{itemize} 
     \item  \c{IRQ_HANDLED} si l'interruption a bien été gérée
-    \item \c{IRQ_NONE}  ... sinon. L'interruption est  alors passée au
-      handler enregistré suivant si l'interruption est partagée
+    \item \c{IRQ_NONE}  dans le cas inverse.  L'interruption est alors
+      passée  au  handler  enregistré  suivant si  l'interruption  est
+      partagée
     \end{itemize} 
-  \item Il doit acquiter l'interruption sur le périphérique
+  \item Il doit acquitter l'interruption sur le périphérique
   \item Il ne doit pas être bloquant: 
     \begin{itemize} 
     \item pas de \c{wait_event}
@@ -501,14 +575,14 @@ void disable_irq(unsigned int irq)
 
 \begin{frame}[fragile=singleslide]{Softirq}
   \begin{itemize} 
-  \item   Les  softirqs   sont  executés   dans   l'environnement  des
+  \item   Les  softirqs   sont  exécutés   dans   l'environnement  des
     interruptions mais alors que les interruptions sont activées
-  \item Elle  n'empêchent pas le déclenchement  des interruptions mais
-    ne sont pas schedulés avec les tâches
+  \item Elles  n'empêchent pas le déclenchement  des interruptions mais
+    ne sont pas ordonnancées avec les tâches
   \item   Par  conséquent,   quasiment  les   mêmes  règles   que  les
     interruptions s'appliquent
   \item Les Softirq sont réservés aux tâche demandant une fréquence de
-    traitement  importante.  Les  developpeurs  du kernel  gardent  le
+    traitement  importante.  Les  développeurs  du kernel  gardent  le
     nombre de Softirq en quantité limitée:
     \begin{lstlisting}[language=sh]
 HI_SOFTIRQ,         BLOCK_IOPOLL_SOFTIRQ,
@@ -517,19 +591,19 @@ NET_TX_SOFTIRQ,     SCHED_SOFTIRQ,
 NET_RX_SOFTIRQ,     HRTIMER_SOFTIRQ,
 BLOCK_SOFTIRQ,      RCU_SOFTIRQ,
     \end{lstlisting} 
-  \item Les Softirq HI et Tasklet sont des multiplexeurs permettant
-    d'éxécuter d'autres tâches
+  \item Les SoftIrq Hi et Tasklet sont des multiplexeurs permettant
+    d'exécuter d'autres tâches
   \item Référence: \c{linux/interrupts.h}
   \end{itemize} 
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Tasklets}
   \begin{itemize} 
-  \item Executés par les Softirq HI et Tasklet
-  \item  HI est  executé  avec la  priorité  la plus  haute parmi  les
-    Softirq, alors que les Tasklets ont quasiement la priorité la plus
+  \item Exécutés par les SoftIrq Hi et Tasklet
+  \item  Hi est  exécuté  avec la  priorité  la plus  haute parmi  les
+    SoftIrq, alors que les Tasklets ont quasiment la priorité la plus
     basse
-  \item Pour initialiser et désenregistrer un tasklet:
+  \item Pour initialiser et dés-enregistrer un tasklet:
     \begin{lstlisting} 
 DECLARE_TASKLET(name, void (*func)(unsigned long), unsigned long data);
 void tasklet_init(struct tasklet_struct *t, void (*func)(unsigned long), unsigned long data);
@@ -540,22 +614,23 @@ void tasklet_kill(struct tasklet_struct *t);
 
 \begin{frame}[fragile=singleslide]{Tasklets}
   \begin{itemize} 
-  \item Pour demander l'éxecution d'un Tasklet (dans le SoftIRQ Tasklet et dans le SoftIRQ HI)
+  \item  Pour  demander  l'exécution  d'un Tasklet  (dans  le  SoftIRQ
+    Tasklet et dans le SoftIRQ Hi)
     \begin{lstlisting} 
 void tasklet_schedule(struct tasklet_struct  *t)
 void tasklet_hi_schedule(struct tasklet_struct *t)
     \end{lstlisting} 
-  \item Si  la tasklet était deja  prévue pour être  éxecutée, elle ne
-    sera executé qu'une fois.
-  \item  Si  la tasklet  est  déjà  en  cours d'éxecution,  elle  sera
-    réexécutée (mais pas simultannément, même sur un SMP).
-  \item Référence: \c{linux/interrupts.h}
+  \item Si  la tasklet était déjà  prévue pour être  exécutée, elle ne
+    sera exécutée qu'une fois.
+  \item  Si  la tasklet  est  déjà  en  cours d'exécution,  elle  sera
+    ré-exécutée (mais pas simultanément, même sur un SMP).
+  \item Référence: \file{linux/interrupts.h}
   \end{itemize}
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Les kthreads}
   \begin{itemize}
-  \item Equivalent à des threads en userspace
+  \item Equivalent à des threads en espace utilisateur
   \item Créer une kthreads:
     \begin{lstlisting} 
 struct task_struct *kthread_create(int (*threadfn)(void *data), void *data, const char namefmt[], ...)
@@ -588,7 +663,7 @@ int kthread_stop(struct task_struct *k)
     processus.  Le cas échéant,  préférez l'utilisation  des Workqueue
     génériques. Enfin,  posez-vous la  question si l'action  doit être
     effectuée dans le noyau ou dans l'espace utilisateur
-  \item Référence: \c{linux/kthread.h}
+  \item Référence: \file{linux/kthread.h}
   \end{itemize} 
 \end{frame} 
 
@@ -596,18 +671,18 @@ int kthread_stop(struct task_struct *k)
   \begin{itemize} 
   \item Mécanisme général pour repousser un calcul
   \item Permet d'ordonnancer des des tâches dans une kthread
-  \item  Exemple d'utilisation  des  Workqueues: flush  des cache  des
-    disques, défragmentation en background, etc...
+  \item  Exemple d'utilisation  des Workqueues:  flush des  caches des
+    disques, défragmentation en arrière-plan, etc...
   \item  \c{INIT_WORK(work,  func)} permet  de  déclarer une  nouvelle
-    structure \c{work} executant \c{func}
+    structure \c{work} exécutant \c{func}
   \item \c{int schedule_work(struct work_struct *work)} permet de
-    demander l'éxecution de \c{work}
+    demander l'exécution de \c{work}
   \item  \c{int schedule_work_on(int  cpu, struct  work_struct *work)}
-    spécifie un CPU particulier surlequel le \c{work} doit s'éxecuter
+    spécifie un CPU particulier sur lequel le \c{work} doit s'exécuter
   \item
     \c{int schedule_delayed_work(struct delayed_work *work, unsigned long delay)}
     démarre \c{work} après un certain délais. Permet de faire des
-    tâches periodiques.
+    tâches périodiques.
   \item \c{bool cancel_delayed_work(struct delayed_work *work)} Annule
     une tâche délayée
   \end{itemize}
@@ -619,8 +694,8 @@ int kthread_stop(struct task_struct *k)
     kthreads) que celle de \c{schedule_work}
   \item
     \c{int queue_work(struct workqueue_struct *wq, struct work_struct *work)}
-    permet de demander l'éxecution de work en spécifiant la workqueue.
-  \item  Il est  aussi possible  de créer  ses propres  workqueue avec
+    permet de demander l'exécution de work en spécifiant la workqueue.
+  \item  Il est  aussi possible  de créer  ses propres  workqueues avec
     \c{alloc_workqueue(name, flags, max_active)}
   \item Référence: \c{linux/workqueue.h}
   \end{itemize}
@@ -653,29 +728,28 @@ int kthread_stop(struct task_struct *k)
 \begin{frame}[fragile=singleslide]{Les Wait Queues}
   Pour attendre un évènement:
     \begin{itemize} 
-    \item Attend  un evenement sur la  queue ET que  la condition soit
+    \item Attend  un évènement sur la  queue ET que  la condition soit
       vérifiée
       \begin{lstlisting} 
 void wait_event(queue, condition);
       \end{lstlisting} 
-    \item  Idem mais  retourne une  erreur  si executé  dans un  appel
-      system et le processus est tué avec \c{SIGKILL}
+    \item  Idem mais  retourne une  erreur  si exécuté  dans un  appel
+      système et le processus est tué avec \c{SIGKILL}
       \begin{lstlisting} 
 int wait_event_killable(queue,  condition);
       \end{lstlisting} 
-    \item  Idem mais  retourne une  erreur  si executé  dans un  appel
-      system et le processus recoit un signal
+    \item  Idem mais  retourne une  erreur  si exécuté  dans un  appel
+      système et le processus reçoit un signal
       \begin{lstlisting} 
 int  wait_event_interruptible(queue, condition);
       \end{lstlisting} 
-    \item   Idem
-      \c{wait_event} mais avec un timeout
+    \item   Idem \c{wait_event} mais avec un timeout
       \begin{lstlisting} 
 void wait_event_timeout(queue, condition);
       \end{lstlisting} 
     \item \c{wait_event_timeout} + \c{wait_event_interruptible}:
       \begin{lstlisting} 
-void  wait_event_tinterruptible_timeout(queue, condition);
+void wait_event_tinterruptible_timeout(queue, condition);
       \end{lstlisting} 
     \end{itemize}    
 \end{frame}
@@ -698,18 +772,18 @@ wait_up_interruptible(queue);
  
 \begin{frame}[fragile=singleslide]{\emph{Coherent mapping}}
   \begin{itemize}
-  \item Gère un mapping ``cohérent'' accessible depuis le device et le
+  \item Gère un mapping ``cohérent'' accessible depuis le périphérique et le
     CPU
     \begin{lstlisting} 
 void *dma_alloc_coherent(
   struct device *dev, /* Device sur lequel est mappé le DMA. Fourni par le framework */
   size_t size,        /* Taille du mapping */
   dma_addr_t *handle, /* Adresse physique à fournir au device */
-  gfp_t gfp)           /* Flags habituels */
+  gfp_t gfp)          /* Flags habituels */
     \end{lstlisting} 
-  \item  \c{dma_alloc_coherent} retourne  une addresse  virtuelle pour
+  \item  \c{dma_alloc_coherent} retourne  une adresse  virtuelle pour
     accéder au mapping par le CPU.
-  \item La liberation du buffer se fait par:
+  \item La libération du buffer se fait par:
     \begin{lstlisting} 
 void dma_free_coherent(struct device *dev, size_t size, void *cpuaddr, dma_handle_t bus_addr);
     \end{lstlisting} 
@@ -727,15 +801,15 @@ dma_addr_t dma_map_single(struct device *dev, void *buffer, size_t size, enum dm
     \end{lstlisting} 
   \item \c{direction} peut être \c{DMA_TO_DEVICE},
     \c{DMA_FROM_DEVICE}, \c{DMA_BIDIRECTIONAL}, \c{DMA_NONE}
-  \item Le cache  n'est pas cohérent. Pour accèder  au buffer, il faut
-    appeller:
+  \item Le cache  n'est pas cohérent. Pour accéder  au buffer, il faut
+    apeller:
     \begin{lstlisting} 
 void dma_unmap_single(struct device *dev, dma_addr_t bus_addr, size_t size, enum dma_data_direction direction)
     \end{lstlisting} 
   \item Cet appel doit être fait après que le périphérique ait terminé
     ces accès au buffer
   \item  Le  \emph{streaming  mapping}  permet des  optimisations  que
-    \emph{coherent mapping} ne permet pas
+    \emph{cohérent mapping} ne permet pas
   \end{itemize}
 \end{frame} 
 
@@ -743,14 +817,12 @@ void dma_unmap_single(struct device *dev, dma_addr_t bus_addr, size_t size, enum
 
 \subsection{Les listes}
 
-  % Structures
-  %    list
 \begin{frame}[fragile=singleslide]{Les listes}
   \begin{itemize} 
   \item Implémentation assez singulière de listes génériques en C. 
   \item  utilisation  de  la  macro  \c{container_of}  qui  permet  de
     retourner  un  pointeur   sur  l'objet  contenant  en  connaissant
-    l'addresse d'un attribut et et le type:
+    l'adresse d'un attribut et et le type:
     \begin{lstlisting} 
 #define container_of(ptr, type, member) ({ \ 
    const typeof( ((type *)0)->member ) *__mptr = (ptr); \
@@ -758,14 +830,14 @@ void dma_unmap_single(struct device *dev, dma_addr_t bus_addr, size_t size, enum
     \end{lstlisting} 
   \item Pour déclarer une liste: 
     \begin{itemize}
-    \item Declarer un type pour les noeuds de sa liste
+    \item Déclarer un type pour les noeuds de sa liste
     \item Ajouter un attribut de type \c{struct list_head} à son type
     \end{itemize} 
   \item   Une   liste   vide    est   alors   composé   d'une   simple
     \c{struct list_head} à déclarer avec \c{LIST_HEAD(my_var)}
   \item Pour  les fonction d'ajout, suppression, etc...  tout est géré
     avec les \c{list_head}
-  \item  Pour accèder  au données  liées à  un \c{list_head},  il faut
+  \item  Pour accéder  au données  liées à  un \c{list_head},  il faut
     utiliser la  macro \c{list_entry} (qui  est en fait la  même chose
     que \c{container_of})
   \item Référence: \file{linux/list.h}
@@ -774,8 +846,7 @@ void dma_unmap_single(struct device *dev, dma_addr_t bus_addr, size_t size, enum
 
 \begin{frame}[fragile=singleslide]{Les listes}
   Exemple: 
-  \note[item]{En faire un module}
-    \begin{lstlisting}
+  \begin{lstlisting}
 #include <linux/list.h>
 stuct my_node_t {
   struct list_head node;
@@ -791,7 +862,7 @@ void f() {
    list_for_each_entry(i, &my_list, node) {
    }
 } 
-    \end{lstlisting} 
+  \end{lstlisting} 
 \end{frame} 
 
 %    rbtree
@@ -821,17 +892,19 @@ void f() {
 
 \section{Mecanismes de synchronisation}
 
+\subsection{Les fifos}
+
 \begin{frame}[fragile=singleslide]{Les fifo}
   \begin{itemize} 
-  \item Appellé aussi \emph{Buffer Circulaire}
+  \item Apellé aussi \emph{Buffer Circulaire}
   \item L'une des structure les plus utilisée dans le noyau
-  \item Permet la communication avec les interruptions (pas de pause
+  \item Permet  la communication avec les interruptions  (pas de pause
     lors des accès) et entre les processus
-  \item Pendant longtemps, chaque driver avait son implémentation de
+  \item Pendant  longtemps, chaque driver avait  son implémentation de
     fifo
   \item    Il   existait   un    début   d'interface    commune   dans
     \file{linux/circ\_buf.h}
-  \item Il existe maintenant une implémentation de référence:
+  \item  Il   existe  maintenant  une   implémentation  de  référence:
     \emph{kfifo}
   \end{itemize} 
 \end{frame} 
@@ -872,14 +945,16 @@ kfifo_is_empty(fifo)
   \end{itemize} 
 \end{frame} 
 
+\subsection{Les mutex}
+
   %    Désactivation de la concurrence
 \begin{frame}{Mutex}
-  Précaution classique à l'utilisation des sections critiques:
+  Précautions classiques à l'utilisation des sections critiques:
   \begin{itemize}
   \item Acquérir le mutex le plus tard possible, Relâcher le plus tôt
   \item Etudier la granularité nécessaires aux sections critiques
   \item   Attention  aux   bug  classiques:   latences,   dead  locks,
-    inversement de priorités
+    inversements de priorités
   \end{itemize} 
 \end{frame}
 
@@ -891,8 +966,8 @@ kfifo_is_empty(fifo)
 DEFINE_MUTEX(name);
 void mutex_init(struct *mutex);
     \end{lstlisting} 
-  \item  Acquérir   le  mutex.  Attention,  si   appelé  depuis  un
-    processus,     celui-ci     ne      peut     plus     être     tué
+  \item Acquérir le mutex.   Attention, si appelé depuis un processus,
+    celui-ci ne peut plus être tué
     \begin{lstlisting} 
 mutex_lock(struct mutex *lock);
     \end{lstlisting} 
@@ -904,6 +979,11 @@ mutex_lock_killable(struct  mutex  *lock);
     \begin{lstlisting} 
 mutex_lock_interruptible(struct mutex *lock);
     \end{lstlisting} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Mutex}
+  \begin{itemize}
   \item Idem, mais retourne immédiatement si le mutex est déjà locké
     \begin{lstlisting} 
 mutex_trylock(struct  mutex  *lock); 
@@ -917,36 +997,43 @@ mutex_is_locked(struct  mutex *lock);
 mutex_unlock(struct mutex *lock);
     \end{lstlisting} 
   \end{itemize}
-  Réfrence: \c{linux/mutex.h}
+  Référence: \c{linux/mutex.h}
 \end{frame} 
 
   %    semaphore
   %    rw_semaphore
 \begin{frame}[fragile=singleslide]{Autre mécanismes}
-Dans la même branche, le noyau propose aussi:
-\begin{itemize} 
-\item Des sémaphores (référence: \file{linux/semaphore.h})
-\item Des \emph{Read-Write Lock} (référence: \file{linux/rw\_semaphore.h})
-\item  Mutex avec protocole  d'héritage de  priorités et  détection de
-  deadlock           (aka           \c{rt_mutex})          (référence:
-  \file{Documentation/rt-mutex-design.txt}, \file{linux/rtmutex.h})
-\item  Les   \c{rtmutex}  peuvent  être  utilisé   par  la  \c{libpthread}
-  (référence:                         \file{Documentation/pi-futex.txt}
-  \file{Documentation/rt-mutex.txt})
-\end{itemize} 
+  Dans la même branche, le noyau propose aussi:
+  \begin{itemize} 
+  \item Des sémaphores (référence: \file{linux/semaphore.h})
+  \item       Des       \emph{Read-Write       Lock}       (référence:
+    \file{linux/rw\_semaphore.h})
+  \item Mutex  avec protocole d'héritage de priorités  et détection de
+    dead        lock       (aka        \c{rt_mutex})       (référence:
+    \file{Documentation/rt-mutex-design.txt}, \file{linux/rtmutex.h})
+  \item Les \c{rt_mutex} peuvent être utilisé par la \c{libpthread}
+  \item          référence:          \file{Documentation/pi-futex.txt}
+    \file{Documentation/rt-mutex.txt}
+  \end{itemize} 
 \end{frame} 
+
+\subsection{Désactivation des interruptions}
 
 \begin{frame}[fragile=singleslide]{Désactivation des interruption et de la préemption}
   \begin{itemize} 
   \item  Lors de  certains  accès, les  mécanismes  de protections  de
-    ressources inter-tâche ne sont plus suffisants.
-  \item   Cela   peut  concerner   des   accès   concurrent  avec   des
+    ressources inter-tâches ne sont plus suffisants.
+  \item   Cela  peut   concerner   des  accès   concurrent  avec   des
     interruptions.
   \item  Il  est alors  nécessaire  de  désactiver temporairement  les
     interruptions afin de garantir que l'on ne sera pas interrompu.
-  \item   Ces fonctions sont à utiliser avec parcimonie:
+  \item Ces fonctions sont à utiliser avec parcimonie
+  \end{itemize}
+\end{frame}  
+
+\begin{frame}[fragile=singleslide]{Désactivation des interruption et de la préemption}
     \begin{itemize} 
-    \item  Sauve/restore  l'état  des  interruptions dans/de  flags  et
+    \item  Sauve/restaure l'état  des interruptions  dans/de  flags et
       désactive les interruptions:
       \begin{lstlisting} 
 local_irq_save(unsigned long flags);
@@ -963,7 +1050,12 @@ local_irq_enable();
       \begin{lstlisting} 
 local_irq_disabled();
       \end{lstlisting} 
-    \item Désactive/Réactive les softirq (bottom halves):
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Désactivation des interruption et de la préemption}
+    \begin{itemize} 
+    \item Désactive/Réactive les SoftIrq (bottom halves):
       \begin{lstlisting} 
 local_bh_disable();
 local_bh_enable();
@@ -974,25 +1066,28 @@ preempt_disable();
 preempt_enable();
       \end{lstlisting} 
     \end{itemize} 
-  \end{itemize} 
 \end{frame} 
+
+\subsection{Spin Lock}
 
 \begin{frame}[fragile=singleslide]{Spin Lock}
   Dans certains cas, une tâche peut avoir besoin d'un accès exclusif à
   une ressource  potentiellement utilisée dans  une interruption. Dans
-  ce cas,  il est  nécessaire de désactiver  les interruption  lors de
+  ce cas,  il est nécessaire  de désactiver les interruptions  lors de
   l'accès à la ressource.   Néanmoins, l'interruption peut se produire
   sur un  autre CPU.   Il est alors  nécessaire de se  protéger contre
   cette éventualité
   \begin{itemize} 
   \item Il s'agit d'une attente active sur une section critique
-  \item Ne traite pas les  problème de concurrence mais de parallélisme
-    uniquement. Par conséquent, uniquement en environnement SMP
+  \item  Ne   traite  pas  les   problèmes  de  concurrence   mais  de
+    parallélisme    uniquement.   Par   conséquent,    uniquement   en
+    environnement SMP
   \item   Principalement  utilisé   lors  de   en  complément   de  la
     désactivation des interruption
-  \item La préemption est aussi désactivé durant un spinlock
-  \item  Le  noyau propose  aussi  des  \emph{Read  Write Spinlock}  :
-    \c{rwlock_t} (Référence \file{linux/rwlock.h})
+  \item La préemption est aussi désactivé durant un spin lock
+  \item  Le  noyau propose  aussi  des  \emph{read/write spin locks}  :
+    \c{rwlock_t} 
+  \item Référence \file{linux/rwlock.h}
   \end{itemize}  
 \end{frame}
 
@@ -1004,19 +1099,24 @@ preempt_enable();
 DEFINE_SPINLOCK(lock);
 spin_lock_init(spinlock_t *lock);
     \end{lstlisting} 
-  \item Idem que les fonction \c{mutex_*}:
+  \item Idem que les fonctions \c{mutex_*}:
     \begin{lstlisting} 
 spin_lock(spinlock_t *lock);
 spin_trylock(spinlock_t *lock);
 spin_unlock(spinlock_t *lock);
     \end{lstlisting} 
+  \end{itemize}  
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{Spin Lock}
+  \begin{itemize}
   \item Lock et désactive/réactive les interruptions sur le processeur
     courant.  Les flags contiennent l'état du masque d'interruption:
     \begin{lstlisting} 
 spin_lock_irqsave(spinlock_t *lock, unsigned long flags);
 spin_unlock_irqrestore(spinlock_t *lock, unsigned long flags);
     \end{lstlisting} 
-  \item Spinlock et désactive/réactive les softirq:
+  \item Spinlock et désactive/réactive les SoftIrq:
     \begin{lstlisting} 
 spin_lock_bh(spinlock_t *lock);
 spin_unlock_bh(spinlock_t *lock);
@@ -1025,9 +1125,8 @@ spin_unlock_bh(spinlock_t *lock);
   Référence :  \file{linux/spinlock.h}
 \end{frame}
 
-% Lister :
   %    operations atomiques
-  %    RCU
+\subsection{Les RCU}
 
 \begin{frame}[fragile=singleslide]{Read-Copy-Update (RCU)}
   Type d'algorithme non bloquant:
@@ -1035,11 +1134,14 @@ spin_unlock_bh(spinlock_t *lock);
   \item La lecture n'est pas bloquante
   \item On note le nombre de lecteurs
   \item Les modification s'effectuent sur une copie de l'objet
-  \item Les lecture suivante se font sur la nouvelle version de l'objet
+  \item  Les lecture  suivante  se  font sur  la  nouvelle version  de
+    l'objet
   \item Lorsque  le dernier lecteur  a terminé, l'objet  d'origine est
     détruit. Seul subsiste la nouvelle version.
-  \item  Les RCU sont un design d'architecture. Les RCU ne possède que peu d'API pouvant être réutilisé.
-  \item Référence \file{Documentation/RCU/whatisRCU.txt} \file{Documentation/RCU/*} 
+  \item Les  RCU sont un  design d'architecture. Les RCU  ne possèdent
+    que peu d'API pouvant être réutilisé.
+  \item        Référence        \file{Documentation/RCU/whatisRCU.txt}
+    \file{Documentation/RCU/*}
   \end{itemize} 
 \end{frame}
 
@@ -1086,11 +1188,12 @@ void write_a() {
   \end{columns}
 \end{frame} 
 
-  %    barrier
+\subsection{Les barrières mémoires}
+
 \begin{frame}[fragile=singleslide]{les barrières mémoire}
   \begin{itemize} 
   \item  Le  compilateur  et  le  CPU peuvent  optimiser  du  code  en
-    réordonnancant les instructions.
+    réordonnançant les instructions.
   \item Le compilateur et le  CPU ne réordonnance que les instructions
     indépendantes (donc, a priori, sans danger)
   \item Ce comportement peut  néanmoins introduire des erreurs sur les
@@ -1100,7 +1203,7 @@ void write_a() {
     structures de données ou d'algorithme
   \item Les  barrière sont implémentées en  utilisant des instructions
     assembleur particulières
-  \item \c{barrier()}  est un barrière  pour le compiler.   Toutes les
+  \item \c{barrier()} est un barrière pour le compilateur.  Toutes les
     instruction   avant   la  barrière   seront   placées  avant   les
     instructions apès la barrière
   \item Toutes les barrières  CPU impliquent une barrière compiler. Du
@@ -1118,16 +1221,16 @@ void write_a() {
       avant la barrière sont terminée avant \c{rmb()} et aucun lecture
       demandées après la barrière n'est commencée avant \c{rmb()}
     \item \c{wmb()} Barrière en écriture
-    \item \c{mb()} Lecture et ecriture
+    \item \c{mb()} Lecture et écriture
     \item   \c{smp_wmb()},  \c{smp_rmb()}   et  \c{smp_mb()}   ont  un
       comportement  identique,  mais  ne  sont présentent  que  si  le
       système est compilé en SMP
     \item Il existe d'autre types de barrières très spécifiques
     \end{itemize} 
   \item  Tous  les  mécanismes  de protections  de  ressources  partagé
-    contiennent  déjà  des barrières  correctement  placées (ca  tombe
+    contiennent  déjà  des barrières  correctement  placées (ça  tombe
     bien, c'est la que c'est le plus complexe)
-   
   \item Référence : \file{Documentation/memory-barriers.txt}
   \end{itemize} 
 \end{frame} 
+

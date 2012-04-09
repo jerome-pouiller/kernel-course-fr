@@ -9,11 +9,7 @@
 
 #include <linux/ioctl.h>
 
-struct m_arg {
-   int sz;
-};
-
-#define FIFO_GET_LEN _IOR('f', 0x00000001, struct m_arg)
+#define FIFO_GET_LEN _IOR('f', 0x00000001, int)
 
 #endif /* MOD2_CHR_H */
 

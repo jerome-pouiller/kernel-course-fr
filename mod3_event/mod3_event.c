@@ -18,9 +18,10 @@ DEFINE_KFIFO(my_fifo, char, 256);
 static ssize_t m_read(struct file *file, char *user_buf, size_t count, loff_t *ppos) {
 	int ret, copied;
 
-	wait_event_interruptible(my_queue, 1);
-	// wait_event_interruptible(my_queue, !kfifo_is_empty(my_fifo));
+//	pr_info("Get read: %d\n", kfifo_is_empty(&my_fifo));
+	wait_event_interruptible(my_queue, !kfifo_is_empty(&my_fifo));
 	ret = kfifo_to_user(&my_fifo, user_buf, count, &copied);
+//	pr_info("Returning : %d\n", copied ? copied : ret);
 	return copied ? copied : ret;
 }
 
@@ -34,25 +35,24 @@ static ssize_t m_write(struct file *file, const char *user_buf, size_t count, lo
 
 
 static struct file_operations m_fops = {
-  .owner   = THIS_MODULE,
-  .read    = m_read,
-  .write   = m_write,
+	.owner   = THIS_MODULE,
+	.read    = m_read,
+	.write   = m_write,
 };
 
 static int __init m_init(void) {
-  // Process acces to driver as soon as it is registered, so it last
-  major = register_chrdev(major, "m_chrdev", &m_fops);
-  if (major < 0) {
-      return major;
-  }
+	// Process acces to driver as soon as it is registered, so it last
+	major = register_chrdev(major, "m_chrdev", &m_fops);
+	if (major < 0) {
+		return major;
+	}
 
-  pr_info("my_chardev: registered between <%d, 0> and <%d, 255>\n", major, major);
-  return 0;
+	pr_info("my_chardev: registered between <%d, 0> and <%d, 255>\n", major, major);
+	return 0;
 }
 
 static void __exit m_exit(void) {
-  //unregister_chrdev_region(MKDEV(major, 0), 256);
-  unregister_chrdev(MKDEV(major, 0), "m_chrdev");
+	unregister_chrdev(major, "m_chrdev");
 }
 
 module_init(m_init);

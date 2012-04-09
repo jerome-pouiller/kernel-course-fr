@@ -43,11 +43,9 @@ static ssize_t m_write(struct file *file, const char *user_buf, size_t count, lo
 }
 
 static long m_ioctl(struct file *file, unsigned int nr, unsigned long arg) {
+	pr_debug("Received ioctl 0x%08x\n", nr);
 	if (nr == FIFO_GET_LEN) {
-		int ret = 0;
-		struct m_arg a;
-		a.sz = idx;
-		ret = copy_to_user(&a, (void *) arg, sizeof(a));
+		int ret = copy_to_user((void *) arg, &idx, sizeof(idx));
 		return ret;
 	}
 	return -EINVAL;
@@ -92,8 +90,7 @@ err_alloc:
 }
 
 static void __exit m_exit(void) {
-  //unregister_chrdev_region(MKDEV(major, 0), 256);
-  unregister_chrdev(MKDEV(major, 0), "m_chrdev");
+  unregister_chrdev(major, "m_chrdev");
   mutex_destroy(&mutex);
   kfree(global_buf);
 }

@@ -45,6 +45,6 @@ module_init(m_init);
 module_exit(m_exit);
 
 MODULE_AUTHOR("Jérôme Pouiller");
-MODULE_DESCRIPTION("A pedagogic character device");
+MODULE_DESCRIPTION("A pedagogic IRQ handler");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("1.24");
+MODULE_VERSION("1.1");

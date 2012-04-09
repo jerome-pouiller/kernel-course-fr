@@ -16,8 +16,10 @@
 %\usepackage{beamerarticle}
 
 % Pour mettre deux pages sur une
-\usepackage{pgfpages}
+% Préférer l'utilisation d'un post processing
+%\usepackage{pgfpages}
 %\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+%\pgfpagesuselayout{4 on 1}[a4paper,landscape, border shrink=5mm]
 %\setbeameroption{show notes on second screen=right}
 
 \input{style}
@@ -30,7 +32,8 @@
 % \subtitle{Sous-titre}
 \author[J. Pouiller]{Jérôme Pouiller \email{j.pouiller@sysmic.org}}
 \hypersetup{pdfauthor={Jérôme Pouiller}}
-\institute[Sysmic]{\hspace*{1cm}\pgfimage[height=1.5cm]{pics/logo}}
+\institute[Sysmic]{\pgfimage[height=1.5cm]{pics/logo-quiris}}
+% \institute[Sysmic]{\hspace*{1cm}\pgfimage[height=1.5cm]{pics/logo}}
 % Plus complet:
 % \institute[Sysmic]{
 %   \inst{1} \hspace*{1cm}\includegraphics[height=1.5cm]{logo}
@@ -40,7 +43,7 @@
 \date[Avr. 2012]{10-12 Avril 2012}
 % Pour le PDF seulement:
 % \subject{}
-% \keywords{noyau, kernel, OS, Linux}}
+\keywords{noyau, kernel, OS, Linux}
   
 \begin{document}
  

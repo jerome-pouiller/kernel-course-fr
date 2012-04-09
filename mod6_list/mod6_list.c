@@ -43,6 +43,6 @@ module_exit(m_exit);
 
 // These uppercase macro will be added to informative section of module (.modinfo)
 MODULE_AUTHOR("Jérôme Pouiller");
-MODULE_DESCRIPTION("A pedagogic Hello World");
-MODULE_LICENSE("Proprietary");
+MODULE_DESCRIPTION("A pedagogic klist usage sample");
+MODULE_LICENSE("GPL");
 MODULE_VERSION("1.1");

@@ -20,15 +20,11 @@
 \end{frame}
 
 \section{Afficher des informations}
-  % printk / pr_*
-  % debugfs
-  % dprintk
-% TODO: Placer ca avant
-% et placer le debug à la fin
-\begin{frame}[fragile=singleslide]{Debugguer}
+
+\begin{frame}[fragile=singleslide]{\texttt{printk}}
   \begin{itemize} 
   \item \c{printk} affiche les information sur la console et les copie
-    dans  un  buffer.  Il  est  possible  d'afficher  ce  buffer  avec
+    dans  un  buffer.   Il  est  possible d'afficher  ce  buffer  avec
     \cmd{dmesg}
   \item   Il  est  possible   d'utiliser  directemenr   \c{printk}  en
     specifiant le degré d'importance de l'information:
@@ -49,18 +45,18 @@ printk(KERN_ALERT "Aie\n");
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]{\c{printk}}
+\begin{frame}[fragile=singleslide]{\texttt{printk}}
   \begin{itemize} 
   \item  \c{printk} est  compatible avec  la norme  C99 et  ajoute des
-   extentions  pour  pretty-pinter  certains pointeurs  (\c{\%p}).  En
+   extensions  pour  pretty-printer  certains pointeurs  (\c{\%p}).  En
    particulier:
      \begin{itemize}
     \item \c{\%pF}  pour résoudre le  nom d'une fonction du  segment de
       text
     \item \c{\%pUB} et \c{\%pUL} pour afficher les UUID ou les GUID
-    \item \c{\%pM} pour afficher des addresses MAC
-    \item \c{\%pI4} pour affichier des addresses IPv4
-    \item \c{\%pI6} et \c{\%pI6c} pour affichier des addresses IPv6
+    \item \c{\%pM} pour afficher des adresses MAC
+    \item \c{\%pI4} pour affichier des adresses IPv4
+    \item \c{\%pI6} et \c{\%pI6c} pour afficher des adresses IPv6
     \item Les  formats d'IP peuvent être suivit  de h, n, l  ou b pour
       demander des conversions d'endian avant d'afficher
     \item \c{\%m} pour \c{errno}
@@ -72,38 +68,41 @@ printk(KERN_ALERT "Aie\n");
   \item  Les \c{pr_debug}  ne sont  compilé  que si  l'une des  option
     \c{CONFIG_DEBUG} ou \c{CONFIG_DYNAMIC_DEBUG} est active
   \item Dans  le cas de  \c{DYNAMIC_DEBUG}, il est  possible d'activer
-    les messages namiquement en passant par debugfs
+    les messages atomiquement en passant par debugfs
   \item Référence: \file{Documentation/dynamic-debug-howto.txt}
   \end{itemize} 
 \end{frame} 
 
+\subsection{Dynamic printk}
+
 \begin{frame}[fragile=singleslide]{debugfs}
-\begin{itemize} 
-\item Un certain nom d'outils de debug sont commandé par debugfs
-\item Il s'agit d'un type de partition virtuel
-\item Activé avec 
-\begin{lstlisting} 
+  \begin{itemize} 
+  \item Un certain nom d'outils de debug sont commandé par debugfs
+  \item Il s'agit d'un type de partition virtuel
+  \item Activé avec 
+    \begin{lstlisting} 
 mount -t debugfs none /sys/kernel/debug
-\end{lstlisting} 
-\item Il est possible d'obtenir le status de dprintk avec 
-\begin{lstlisting} 
+    \end{lstlisting} 
+  \item Il est possible d'obtenir le statut de dprintk avec
+    \begin{lstlisting} 
  cat /sys/kernel/debug/dynamic_debug/control
-\end{lstlisting} 
-\item ... et d'activer de nouvelles traces avec 
- \begin{lstlisting} 
+    \end{lstlisting} 
+  \item ... et d'activer de nouvelles traces avec 
+    \begin{lstlisting} 
 echo 'file hello.c +plf' >  /sys/kernel/debug/dynamic_debug/control
-\end{lstlisting} 
-\end{itemize} 
+    \end{lstlisting} 
+  \end{itemize} 
 \end{frame} 
 
 %% TODO parler ici des sysrq. Reprendre le docbook de kgdb et de freeelectron
-\begin{frame}[fragile=singleslide]{SysRq}
-\end{frame}  
+%\begin{frame}[fragile=singleslide]{SysRq}
+%\end{frame}
 
+\section{kgdb}
 
   % kgdb
 \begin{frame}[fragile=singleslide]{Debuguer le noyau}
-  Activiation d \cmd{kgdb} permettant d'embarquer \cmd{gdbserver} dans
+  Activation d \cmd{kgdb} permettant d'embarquer \cmd{gdbserver} dans
   le noyau:
   \begin{itemize}
   \item Compilation
@@ -137,20 +136,20 @@ gdb> target remote /dev/ttyUSB1
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]{Debuguer le noyau}
-  Nécessite  une modification  du driver  \file{atmel\_serial}  afin de
-  permettre   l'utilisation  de   son  port   serie   par  \cmd{kgdb}.
-  Modification  apportée par  Albin Tonerre  backportée de  la version
-  2.6.34 du noyau (nous y reviendrons):
-  \begin{lstlisting}
-host$ patch -p1 < 0001-serial-atmel_serial-add-poll_get_char-and-poll_put_c.patch 
-  \end{lstlisting} 
+% \begin{frame}[fragile=singleslide]{Debuguer le noyau}
+%   Nécessite  une modification  du driver  \file{atmel\_serial}  afin de
+%   permettre   l'utilisation  de   son  port   serie   par  \cmd{kgdb}.
+%   Modification  apportée par  Albin Tonerre  backportée de  la version
+%   2.6.34 du noyau (nous y reviendrons):
+%   \begin{lstlisting}
+% host$ patch -p1 < 0001-serial-atmel_serial-add-poll_get_char-and-poll_put_c.patch 
+%   \end{lstlisting} 
 
-\note[item]{testé avec la version 2.6.37, mais devait fonctionner comme ca}
-\end{frame}
+% \note[item]{testé avec la version 2.6.37, mais devait fonctionner comme ca}
+% \end{frame}
 
-\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
-  Gestion de l'éxecution
+\begin{frame}[fragile=singleslide]{Commandes gdb utiles}
+  Gestion de l'exécution
   \begin{itemize}
   \item Point d'arrêt à l'adresse \verb+0x9876+
     \begin{lstlisting}
@@ -176,7 +175,7 @@ gdb> r arg
   \end{itemize}
 \end{frame}
   
-\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+\begin{frame}[fragile=singleslide]{Commandes gdb utiles}
   Obtenir des informations
   \begin{itemize}
   \item Voir la pile d'appel
@@ -202,7 +201,7 @@ gdb> p abs(2 * (a -  4))
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+\begin{frame}[fragile=singleslide]{Commandes utiles}
   Debuguer à chaud
   \begin{itemize}
   \item Attacher \verb+gdb+ à un processus existant
@@ -216,7 +215,7 @@ gdb> detach
    \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile=singleslide]{Debuguer une application utilisateur}{Commandes utiles}
+\begin{frame}[fragile=singleslide]{Commandes utiles}
   Et plus...
   \begin{itemize}
   \item Afficher  la valeur de \verb+i+  à chaque fois  que l'on passe
@@ -241,6 +240,171 @@ gdb> thread 1
       \end{lstlisting}
     \end{itemize}
 \end{frame}
+
+\begin{frame}[fragile=singleslide]{Kgdb et les modules}
+  \begin{itemize} 
+  \item Les modules sont chargé dynamiquement. Ils ne sont pas contenu
+    dans le fichier \file{vmlinux}
+  \item Il  est nécessaire d'indiquer à  gdb de charger  le module que
+    l'on souhaite débuguer
+  \item Néanmoins, gdb ne peut pas savoir à quel addresse à été chargé
+    le module
+  \item    Ces    informations    peuvent   être    récupérées    dans
+    \file{/sys/modules/*/sections}
+  \item On peut alors les donner à gdb avec \c{add-symbol-file}:
+    \begin{lstlisting} 
+target% cat /sys/modules/my_modules/sections
+host$ gdb vmlinux
+> target remote 192.168.1.55:2345
+> add-symbol-file my_modules.ko 0xd0832000 \
+     -s .bss 0xd0837100 -s .data 0xd0836be0
+    \end{lstlisting} 
+  \item    Il   existe   des    scripts   effectuant    la   procédure
+    automatiquement. A adapter suivant vos besoins.
+  \end{itemize}
+\end{frame} 
+
+\section{Tracker la mémoire}
+
+\begin{frame}[fragile=singleslide]{kmemleak}
+  \begin{itemize} 
+  \item Active  un algorithme proche  d'un garbage collector.  Mais au
+    lieu  de  libérer  la  mémoire, enregistre  simplement  les  blocs
+    perdus.
+  \item Le résultat se trouve dans \file{/sys/kernel/debug/kmemleak}
+  \item La procédure classique:
+    \begin{lstlisting} 
+target% echo clear > /sys/kernel/debug/kmemleak
+target% modprobe my_module
+...
+target% modprobe -r my_module
+target% echo scan > /sys/kernel/debug/kmemleak
+target% cat /sys/kernel/debug/kmemleak
+    \end{lstlisting} 
+  \item Référence: \file{Documentation/kmemleak.txt}
+  \end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile=singleslide]{kmemcheck}
+  Modifie la  MMU de manière à  ce qu'une exception  soit déclenchée à
+  chaque accès à la mémoire. Lors qu'un accès en lecture est effectué,
+  kmemcheck  vérifie si  l'octet à  déjà été  écrit auparavent.  Si ca
+  n'est pas le cas, une erreur du même type qu'un Oops est générée
+  \\[2ex]
+  (Pas disponible sur ARM)
+  \\[2ex]
+  Référence: \file{Documentation/kmemcheck.txt}
+\end{frame} 
+
+\section{Outils à base de Kprobe et apparentés}
+
+\subsection{kprobe}
+
+\begin{frame}[fragile=singleslide]{Kprobe}
+  D'un point  de vue générique, Les Kprobes  permettent de d'effectuer
+  une  action  lors  du  passage  de l'exécution  d'une  case  mémoire
+  particulière (Référence: \file{Documentation/kprobes.txt})
+  \\[2ex]
+  Dans la partie userspace, il  existe une api d'avoir des informations
+  statistique sur le passage sur  une ligne.  Il suffit d'indiquer une
+  adresse (ou un symbole) à prober :
+  \begin{lstlisting} 
+echo 'p do_fork' > /sys/kernel/debug/tracing/kprobe_events 
+  \end{lstlisting} 
+  ... et de l'activer
+  \begin{lstlisting} 
+echo 1 > /sys/kernel/debug/tracing/events/kprobes/p_do_fork_0/enable             
+  \end{lstlisting} 
+  On peut maintenant lire les résultats dans:
+  \begin{lstlisting} 
+cat /sys/kernel/debug/tracing/trace
+  \end{lstlisting} 
+  Référence: \file{Documentation/trace/kprobetrace.txt}
+\end{frame} 
+
+\subsection{Tracepoint}
+
+\begin{frame}[fragile=singleslide]{Tracepoint}
+  Les tracepoints sont  des endroit spécifié dans le  code du noyau qui
+  peuvent sembler intéressant à mesurer:
+  \begin{itemize}  
+  \item Pas de possibilité de les déclarer n'importe ou dans le code
+  \item Permet d'obtenir plus d'informations que les kprobes
+  \item Les développeur du noyau  ont estimé que l'endroit était pour y mettre un tracepoint et ont configuré le format adéquate (cf.
+    \file{/sys/kernel/debug/tracing/events/*/format})
+  \item  L'overhead pour  un  tracepoint désactivé  est  un poil  plus
+    important que  pour les kprobe  vu qu'il n'y  a pas de patch  à la
+    volée du code (mais du coup l'usage est permit en XIP)
+  \end{itemize} 
+  Pour en obtenir la liste des tracepoints:
+  \begin{lstlisting} 
+find /sys/kernel/debug/tracing/events/ -type d
+  \end{lstlisting} 
+  Il  est évidement  possible  de de  définir  ses propres  tracepoints
+  (cf. \file{Documentaiton/trace/tracepoints.txt})
+  \\[2ex]
+  Référence: \file{Documentation/trace/events.txt}
+\end{frame} 
+
+\subsection{Ftrace}
+
+\begin{frame}[fragile=singleslide]{ftrace}
+  Permet  d'instrumenter certaines  latence  particulière. Il  utilise
+  l'option  \c{-pg} de  \c{gcc}. Cela  ajoute un  appel  à \c{_mcount}
+  avant chaque  appel de fonction.  Contrairement à  kprobe, ftrace ne
+  peut se placer qu'au début d'une fonction.
+  \\[2ex]
+  Néanmoins, ftrace est très utilisé dans le temps réel, la mesure des
+  temps de latence et l'étude du scheduling.
+  \\[2ex]
+  Reference:                      \file{Documentation/trace/ftrace.txt}
+  \file{Documentation/trace/ftrace-design.txt}
+\end{frame} 
+
+\subsection{Oprofile}
+
+\begin{frame}[fragile=singleslide]{oprofile}
+  Les CPU  modernes possèdent des  registres de debugs  et breakpoints
+  hardware capable de profiler  le code. Oprofile permet de paramétrer
+  et  de  visualiser le  contenu  de  ces  registres.  Oprofile  n'est
+  disponible que sur certaines architectures.
+\end{frame} 
+
+\subsection{Perf}
+
+\begin{frame}[fragile=singleslide]{perf}
+  perf vous offre une interface pour accéder :
+  \begin{itemize} 
+  \item  aux tracepoint
+  \item  aux kprobe
+  \item  aux registres de debug hardware et au breakpoints hardware
+  \end{itemize} 
+  Ainsi,  perf offre  une  interface plus  complète  que oprofile  (et
+  disponibles sur plus d'architecture)
+  \\[2ex]
+  (perf ne compile pas sur notre carte de test  car notre toolchain est un peu trop
+  vieille pour le noyau 3.3 (et j'ai la flemme de la recompiler))
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{SystemTap}
+  Permet    d'accéder   à    quasiment   toutes    les   technologies
+  précédentes.  Compiler  en  natif,   ce  qui  permet  d'être  très
+  rapide... Nécessite une formation à lui-seul.
+  \\[2ex]
+  Le principe:
+  \begin{itemize} 
+  \item  On écrit du pseudo-code C
+  \item  Il est converti en un modules C
+  \item  Il est compilé, puis chargé sur le noyau de la cible
+  \item  Le résultats est récupéré par un service appelé \emph{relayfs}
+  \end{itemize} 
+  Référence: systemtap-doc
+  \\[2ex]
+  Pour   une   vue  globale   est   différents   outils  d'instrumentation:
+  \file{Documentation/trace/tracepoint-analysis.txt}
+\end{frame} 
+
+
 
   % kdb
   % Les magic keys

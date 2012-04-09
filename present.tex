@@ -11,11 +11,13 @@
 
 \part{Présentation}
 
+\section{Présentation de la cible}
   % De la board
 \begin{frame}{La cible: Calao USB-A9260}
   \begin{center}
-    \pgfimage[height=5cm]{pics/USB-AT91-1}\hspace{1cm}\pgfimage[height=5cm]
-    {pics/USB-AT91-2}
+    \pgfimage[height=5cm]{pics/USB-AT91-1}
+    \hspace{1cm}
+    \pgfimage[height=5cm]{pics/USB-AT91-2}
   \end{center}
 \end{frame}
 
@@ -24,14 +26,16 @@
   \begin{itemize}
   \item Microcontrolleur Atmel AT91SAM9260
   \item Core ARM926EJ-S 180MHz
-  \item 256Mo de flash
   \item 64Mo de RAM
+  \item 256Mo de flash
   \item 64Ko d'EEPROM
   \end{itemize}
   Choisie car compacte et très bien supportée par Linux
+  \note{Montrer: les documentations, la toolchain, le schema de blocks}
 \end{frame}
 
-  % Linux + LIBC + GNU
+\section{Qu'est-ce que Linux?}
+
 \begin{frame}{Composants de Linux}
   GNU/Linux est finalement un aggloméra:
   \\[2ex]
@@ -92,7 +96,6 @@
   \end{itemize}
 \end{frame}
 
-% De GNU/Linux
 \begin{frame}{Le Projet GNU}
   \begin{itemize}
   \item Créé en 1983 par Richard Stallman
@@ -115,18 +118,39 @@
 
 \begin{frame}{Le noyau Linux}
   \begin{itemize}
-  \item Créé  en 1991 par  Linus Torvalds 
-    \note[item]{Parler  de Linus  l'universitaire}
-  \item Système communautaire 
-   \note[item]{Parler du lien avec la GPL et du pragmatisme de Linus}
+  \item Créé en 1991 par Linus Torvalds:
+    \begin{itemize} 
+    \item \url{http://groups.google.com/group/comp.os.minix/browse_thread/thread/76536d1fb451ac60}
+    \item Inspiré de Minix
+    \item \emph{``just a hobby, won't be big and professional like gnu''}
+      \note[item]{Parler  de Linus  l'universitaire}
+    \end{itemize} 
+  \item Noyau monolithique
+    \begin{itemize} 
+    \item Débat Tanenbaum–Torvalds
+    \item \url{http://groups.google.com/group/comp.os.minix/browse_thread/thread/c25870d7a41696d2}
+    \item Modulaire depuis  la  version  2.6
+      \note[item]{Parler des microkernel}
+      \note[item]{Parler de Windows, Mach, Hurd, hyperviseurs}
+    \end{itemize} 
+  \item Système communautaire
+    \begin{itemize} 
+    \item La licence GPL à été choisie par pragmatisme et non par conviction
+    \item Eternels débats d'opinions entre Stallman et Torvalds
+    \end{itemize} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Le noyau Linux}{Quelques chiffres}
+  \begin{itemize}
   \item 15 millions de lignes de code dans 30000 fichiers (+15\%/an)
   \item Environ 1200 développeurs dans 600 entreprises (+35\%/an)
   \item Environ 5000 contributeurs depuis la première version de Linux
-  \item  Environ  650  mainteneurs  (c'est-à-dire  responsbales  d'une
+  \item  Environ  650  mainteneurs  (c'est-à-dire  responsables  d'une
     partie du noyau)
-  \item 24 architecures (= jeux d'instructions)
+  \item 26 architecures (= jeux d'instructions)
   \item Des centaines de plateformes
-  \item Environ 1000 drivers
+  \item Plus d'un millier de drivers
   \item Une centaine de versions publiées
   \item Environ 10000 contributions sur chaque version
   \item Enormément de ``forks'' et de version non-officielles
@@ -136,14 +160,7 @@
 \end{frame}
 
 
-  % De Linux
-  % Chiffres
   % Les choix technologiques historiques:
-  %    Minix
-  %    Monolitique/microkernel
   %    C vs C++
-  %    L'API instable
-  %    La GPL
-  % Liste des Architecture -> A déplacer dans liste des repertoires
-  % Versionning 2.4 2.6 3.0
+
 

@@ -19,15 +19,8 @@
   \tableofcontents[currentpart]
 \end{frame}
 
-\section{Création de modules}
+\section{Macros de base}
 
-  % insmod/rmmmod
-  % modprobe
-  % Compiler à l'extérieur du kernel
-  % Les Macro
-  %   Les paramètres
-  %   /sys/**/param
-  % Les licences
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
   Un template de module:
   \lstinputlisting[language=c,firstline=16]{modules/my_module1.c}
@@ -37,22 +30,23 @@
   Ces macros  permettent de placer  des informations sur  des symboles
   particulier dans module;
   \begin{itemize} 
-  \item Déclare  la fonction  à apeller lors  du chargement  du module
+  \item Déclare  la fonction  à appeler lors  du chargement  du module
   (traditionnellement module\texttt{\_init})
     \begin{lstlisting} 
 module_init
     \end{lstlisting} 
-  \item Déclare la fonction à  appeller lors du déchargement du module
+  \item Déclare la fonction à  appeler lors du déchargement du module
   (traditionnellement module\texttt{\_exit})
     \begin{lstlisting} 
 module_exit
     \end{lstlisting} 
-  \item Déclare un auteur du fichier. Peut apparaitre plusieurs fois.
+  \item Déclare un auteur du fichier. Peut apparaître plusieurs fois.
     \begin{lstlisting}
 MODULE_AUTHOR
     \end{lstlisting}
   \end{itemize}
 \end{frame}
+
 \begin{frame}[fragile=singleslide]{Quelques macros de base}
   \begin{itemize} 
   \item Description du modules
@@ -80,22 +74,25 @@ MODULE_LICENSE
   \end{itemize}
 \end{frame}
 
+\section{Licenses des modules}
+
 \begin{frame}[fragile=singleslide]{Parlons des licenses}
-  Le noyau est sous license GPL. Néanmoins, le débat est ouvert sur la
-  possibilité  qu'un module  propriétaire puisse  se linker  avec.  Le
-  débat n'est pas  tranché. Le noyau laisse la  possibilité à l'auteur
-  d'exporter   ses   modules   avec   \verb+EXPORT_SYMBOL+   ou   avec
-  \verb+EXPORT_SYMBOL_GPL+.
-  \\[2ex]
-  Si vous développez un module Propriétaire, vous n'aurez pas accès à
-  toute l'API du noyau (environ 90\% seulement).
-  \\[2ex]
-  Il est néanmoins possible de contourner le problème en utilisant un
-  module intermédiaire comme proxy logiciel.
-  \\[2ex]
-  De plus,  un module  propriétaire ne doit  pas compiler  en statique
-  avec  le noyau  (le résultat  est alors  considéré comme  un travail
-  dérivé du noyau). Il doit rester sous la forme d'un module.
+  \begin{itemize} 
+  \item Le noyau est développé sous licence GPLv2
+  \item La  GPL indique que tout  travail dérivé d'un  projet sous GPL
+    doit être GPL.
+  \item Ainsi, un module propriétaire ne doit pas compiler en statique
+    avec le  noyau (le résultat  est alors considéré comme  un travail
+    dérivé du noyau). Il doit rester sous la forme d'un module.
+  \item Pour  le l'utilisation dynamique des symboles,  le débat n'est
+    pas tranché.  Le noyau laisse la possibilité à l'auteur d'exporter
+    ses     modules      avec     \verb+EXPORT_SYMBOL+     ou     avec
+    \verb+EXPORT_SYMBOL_GPL+.
+  \item Si  vous développez un  module Propriétaire, vous  n'aurez pas
+    accès à toute l'API du noyau (environ 90\% seulement).
+  \item  Il  est  néanmoins  possible  de contourner  le  problème  en
+    utilisant un module intermédiaire comme proxy logiciel.
+  \end{itemize} 
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Les licences}
@@ -103,7 +100,7 @@ MODULE_LICENSE
   système   de  compilation  du   noyau  empêchera   les  compilations
   illégales.   \verb+MODULE_LICENCE+ peut  prendre  plusieurs valeurs:
   GPL, GPL v2, GPL and additionnal rights, Dual MIT/GPL, Dual BSD/GPL,
-  Dual  MPL/GPL.   Toutes les  autre  valeurs  sont considérées  comme
+  Dual  MPL/GPL.  Toutes  les  autres valeurs  sont considérées  comme
   propriétaire.
 
   \file{/proc/sys/kernel/tainted} (ou  \cmd{uname -a}) indique  si des
@@ -113,12 +110,14 @@ MODULE_LICENSE
   \begin{itemize} 
   \item Pas de support de la part de la communauté
   \item Pas de garantie de la qualité du modules
-  \item Mauvaise image auprès de la communauté et de clients
+  \item Mauvaise image auprès de la communauté et des clients
   \end{itemize}
 
   Par  expérience,  les modules  propriétaires  que  l'on croise  dans
   l'embarqué peuvent cacher tout et n'importe quoi.
 \end{frame}
+
+\section{Développement des modules}
 
 \begin{frame}[fragile=singleslide]{Headers}
   Il  n'est  pas   possible  pour  le  noyau  de   compiler  avec  des
@@ -134,6 +133,9 @@ MODULE_LICENSE
   \lstinputlisting[language=c,lastline=14]{modules/my_module1.c}
 \end{frame}
 
+\section{Ecriture des Makefile}
+
+\subsection{A l'extérieur du noyau}
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
   Fichier \c{Makefile} à l'extérieur du noyau:
@@ -145,7 +147,7 @@ obj-m := my_module.o
 host$ KDIR=/lib/modules/$(uname -r)/build
 host$ make -C $KDIR ARCH=arm M=$(pwd) modules
   \end{lstlisting} % $
-  Il aussi est possible d'appeller les cibles \c{help} et \c{modules_install}
+  Il aussi est possible d'appeler les cibles \c{help} et \c{modules_install}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
@@ -168,9 +170,9 @@ host$ make ARCH=arm KDIR=../linux-2.6/usb-a9260
   Référence: \file{Documentation/kbuild/modules.txt}
 \end{frame}
 
-  % Compiler à l'interieur du kernel
-  % Fonctionnement de Kconfig
-\begin{frame}[fragile=singleslide]{Compilation avec Kmake}
+\subsection{A l'intérieur du noyau}
+
+\begin{frame}[fragile=singleslide]{Compilation avec Kbuild}
   Fichier \file{Makefile} à l'intérieur de l'arborescence noyau:
   \begin{lstlisting}
 obj-$(MY_COMPILE_OPTION) := my_module.o  
@@ -183,9 +185,44 @@ obj-$(MY_COMPILE_OPTION) := my_module.o
   \end{itemize}
   Fichier \file{Kconfig}:
   \lstinputlisting[langage=]{modules/Kconfig}
-  \note[item]{detailler les différentes options de Kconfig}
-  Référence: \file{Documentation/kbuild/makefiles.txt}, \file{Documentation/kbuild/kconfig-language.txt}
+\end{frame} 
+
+\begin{frame}[fragile=singleslide]{Utilisation de Kconfig}
+  Chaque entrée \c{config} prend comme attribut:
+  \begin{itemize} 
+  \item Son type et sa description en une ligne:
+    \begin{itemize}
+    \item \c{tristate}, le plus  classique pouvant prendre les valeurs
+     ø, m et y
+    \item \c{bool} pouvant prendre seulement les valeurs n et y
+    \item \c{int} prennant un nombre
+    \item \c{string} prennant une chaîne
+    \end{itemize} 
+  \item \c{default} Sa valeur par défaut
+  \item  \c{depends on} L'option  n'apparait si  l'expression suivante
+    est vraie.  Il est possible de spécifier  des conditions complexes
+    avec les opérateurs \c{&&}, \c{||}, \c{=} et \c{\!=}
+  \item \c{select}  Active automatiquement les options  en argument si
+    l'option est activée
+  \item   \c{help}  Description   détaillée  de   l'option.   Si  votre
+    description ne  tient pas en moins  de 20 lignes,  pensez à écrire
+    une documentation dans \file{Documentation} et à y faire référence
+  \end{itemize} 
 \end{frame}
+
+\begin{frame}[fragile=singleslide]{Utilisation de Kconfig}
+  Il est aussi possible:
+  \begin{itemize} 
+  \item D'inclure d'autres fichiers avec \c{source}
+  \item De déclarer un sous menu avec \c{menu}
+  \item  De demander  un choix  parmis un  nombre fini  d'options avec
+    \c{choice}
+  \end{itemize} 
+  Référence:                 \file{Documentation/kbuild/makefiles.txt},
+  \file{Documentation/kbuild/kconfig-language.txt}
+\end{frame}
+
+\section{Charger des modules}
 
 \begin{frame}[fragile=singleslide]{Gérer les modules}
   \begin{itemize} 
@@ -219,6 +256,7 @@ target% modprobe -r my_module
   \item Mettre à jour le fichier de dépendances
     \begin{lstlisting} 
 target% depmod
+host$ depmod -b ~/rootfs 
     \end{lstlisting} %$
   \item Notons que les  modules sont des binaires \emph{elf} standards
     qui peuvent être analysés avec les outils standard:
@@ -228,13 +266,16 @@ host$ arm-linux-objdump -t my_module.ko
   \end{itemize}
 \end{frame}
 
+\section{Utiliser des paramètres}
+
 \begin{frame}[fragile=singleslide]{Paramètres}
   Il est possible de passer des paramètres aux modules:
   \begin{lstlisting}
 target$ modinfo my_module.ko 
 target% insmod my_module.ko param=2  
   \end{lstlisting} %$ 
-  Il est possible de passer le paramètre au boot avec \c{my_module.param=2}
+  Il   est   possible   de   passer   le  paramètre   au   boot   avec
+  \c{my_module.param=2}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Paramètres}
@@ -251,7 +292,7 @@ module_param(name, type, perm);
     \cmd{charp})
   \item        \cmd{perm}:        Permissions        du        fichier
     \file{/sys/module/<module>/parameters/<param>}.    (utiliser   les
-    macros de \file{linux/stat.h}). Si 0, le fichier n'apparait pas.
+    macros de \file{linux/stat.h}). Si 0, le fichier n'apparaît pas.
   \end{itemize}
   La paramètre doit évidement être alloué:
   \begin{lstlisting}[language=c]
@@ -267,35 +308,45 @@ MODULE_PARM_DESC(param, "Useless parameter");
 \begin{frame}[fragile=singleslide]{\texttt{/sys}}
   Etudions \file{/sys}
   \begin{itemize}
-  \item                       \file{/sys/module/my\_module/parameters}:
-    paramètres. Modifiable si déclaré modifiables
-  \item \file{/sys/module/my\_module/sections}:  des info sur  la zone
+  \item          \file{/sys/module/my\_module/parameters}:         Les
+    paramètres. Modifiables si déclarés modifiables
+  \item \file{/sys/module/my\_module/sections}:  Des infos sur  la zone
     de chargement
   \end{itemize}
 \end{frame}
 
-  %   Le coding style
-  %   La documentation
-  %   Gestion des erreurs:
-  %       -EAGAIN, etc...
-  %       goto
-  %        errno.h
-\subsection{Programmer}
+\subsection{Le Coding Style}
+
+\begin{frame}[fragile=singleslide]{Le Coding Style}
+  Quelques remarques sur la programmation à l'intérieur du noyau:
+  \begin{itemize} 
+  \item Il n'est  pas possible d'accèder aux fonctions  de la libc (ni
+    des autres bibliothèques) à l'intérieur du noyau
+  \item Pas  de C++  dans le noyau.  C'est techniquement  fesable mais
+    déconseillé et sera refusé par l'upstream
+  \item Il n'y a  pas de garde fou pour la mémoire  du noyau. Un accès
+    mémoire invalide pourra potentiellement  est rattrapé par un Oops,
+    mais ca n'est pas garanti.
+  \item  Attention à  la  portabilité.  Votre code  ne  doit pas  être
+    dépendant de l'endianess ou de taille des integer.
+  \end{itemize} 
+\end{frame}
+
 \begin{frame}[fragile=singleslide]{Le Coding Style}
   \begin{itemize} 
   \item On  ne doit pas avoir besoin  d'utiliser l'ascenseur (vertical
-    ou horizontal)  pour lire  une fonction (bref:  80 colonne  et pas
-    trop de lignes par fonctions)
+    ou horizontal)  pour lire une  fonction (bref: 80 colonnes  et pas
+    trop de lignes par fonction)
   \item Indentation à la tabulation
   \item ... et une tabulation fait 8 espaces
   \item Si  l'indentation vous empêche d'écrire  votre fonction, c'est
-    que celle-ci possède trop de niveau d'imbrication
+    que celle-ci possède trop de niveaux d'imbrication
   \item Mettre  au propre  les tabulations et  vérifier la  taille des
     lignes:
     \begin{lstlisting} 
 host$ scripts/cleanfile my_module.c
     \end{lstlisting} %$
-  \item Incolade sur la même ligne que les bloc
+  \item Incolade sur la même ligne que les blocs
   \item ... sauf pour les fonctions
   \item  Pour indenter correctement votre code
     \begin{lstlisting}
@@ -307,16 +358,18 @@ host$ scripts/Lindent my_module.c
 
 \begin{frame}[fragile=singleslide]{CodingStyle}
   \begin{itemize} 
-  \item Les variable locale doivent être courtes
+  \item Les noms des variables locales doivent être courts
+  \item Si  vous avez  besoin de nom  plus explicites, c'est  que vous
+    avez trop de variables locales
   \item Pas de CamelCase
-  \item Si vous n'arriver pas à  vous y retrouver, c'est que vous avez
-    trop de variables locales
   \item  Il faut  préserver  la  propreté de  l'espace  de nommage  en
-    préfixant  par statique  tout ce  qui  ne doit  pas être  expporté
+    préfixant  par statique  tout ce  qui  ne doit  pas être  exporté
     (fonctions, variables)
   \item Référence: \file{Documentation/CodingStyle}
   \end{itemize} 
 \end{frame} 
+
+\subsection{La documentation}
 
  % A couper en deux: une  partie au niveau de "arboresence de sources"
  % et une partie au niveau de l'API
@@ -331,12 +384,14 @@ host$ scripts/Lindent my_module.c
   % par mail
   %   connaitre avoir l'auteur avec AUTOR
   %   connaitre l'auteur avec git blame
+\subsection{Règles de documentation}
+
 \begin{frame}[fragile=singleslide]{La documentation}
   \begin{itemize}
   \item Le noyau n'est pas un modèle de documentation
   \item En  revanche, le système de  développement facilite énormément
     la recherche d'informations
-  \item  Le noyau utilise  un script  perl appellé  \c{kernel-doc}. Ce
+  \item  Le noyau utilise  un script  perl appelé  \c{kernel-doc}. Ce
     script parcours le code à la recherche de syntaxe du même type que
     doxygen.  (Référence: \file{Documentation/kernel-docs.txt})
   \item  Un  commentaire ne  doit  pas ce  substituer  à  un code  pas
@@ -357,6 +412,8 @@ host$ scripts/Lindent my_module.c
   \end{itemize}
 \end{frame} 
 
+\subsection{Où trouver la documentation}
+
 \begin{frame}[fragile=singleslide]{Trouver de la documentation}
   \begin{itemize} 
   \item Dans \file{Documentation} (en utilisant \cmd{grep})
@@ -364,7 +421,7 @@ host$ scripts/Lindent my_module.c
     format Docbook (\file{Documentation/DocBook})
   \item ... en particulier  \emph{Linux Device Drivers} et \emph{Linux
       Device  Drivers}. Toutefois, ces  compilations sont  loin d'être
-    exaustives
+    exhaustives
   \item  La cible  \c{mandocs}  permet d'extraire  les différente  API
     invoquée dans les DocBook sous forme de pages de man.
   \item    \url{http://kernel.org/doc}     regroupe    les    diverses
@@ -376,23 +433,50 @@ host$ scripts/Lindent my_module.c
   \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile=singleslide]{Les livres de référence}
+  Les références:
+  \\
+  \begin{center}
+    \pgfimage[height=3cm]{biblio/UnderstandingTheLinuxKernel}
+    \hspace{0.5cm}
+    \pgfimage[height=3cm]{biblio/LinuxDeviceDrivers}
+    \hspace{0.5cm}
+    \pgfimage[height=3cm]{biblio/BuildEmbeddedLinuxSystems}
+  \end{center}
+  \begin{itemize} 
+  \item LWN: \url{http://lvn.net}
+  \item Embedded Linux Wiki : \url{http://elinux.org}
+  \end{itemize} 
+  Les références de nos amis de la communauté francaise:
+  \begin{itemize} 
+  \item Gilles Blanc: Linux embarqué - Comprendre, développer, réussir
+  \item Jérôme Pouiller: \url{http://sysmic.org}
+  \item      Thomas     Petazzoni      et      Michael     Opdenacker:
+    \url{http://free-electrons.com/docs/}
+  \end{itemize} 
+\end{frame}
+
+\subsection{Trouver de l'aide}
+
 \begin{frame}[fragile=singleslide]{Trouver de l'aide}
   Demander de l'aide à la communauté
   \begin{itemize}
   \item Le fichier \c{MAINTAINERS} contient la liste des mainteneur de
     chaque sous-système
-  \item  Les entrées  commencant par  \texttt{L:} indique  des mailing
-    lists
+  \item  Les entrées  commencant par  \texttt{L:} indique  des \emph{mailing
+    lists}
   \item Notons \email{linux-newbie@vger.kernel.org}
   \item \c{MAINTAINERS}  liste aussi les sites  officiel, les fichiers
     de  documentation,  etc...  pour  les  différents sous-projets  du
     noyau
   \item \c{git blame} permet de  savoir qui a modifier la fonctions ou
-    les lignes qui  nous intéresse. Cela permet de  s'oreinter vers le
+    les lignes qui  nous intéresse. Cela permet de  s'orienter vers le
     bon groupe
   \item Référence: \url{http://kernel.org/doc}
   \end{itemize}
 \end{frame} 
+
+\section{L'API}
 
 \begin{frame}[fragile=singleslide]{L'API non-stable}
   \begin{itemize} 
@@ -403,29 +487,32 @@ host$ scripts/Lindent my_module.c
   \item  C'est  encore pire  de  maintenir  un  module pour  plusieurs
     versions (driver nvidia par exemple)
   \item En  revanche, l'API non  stable permet des  développement plus
-    agiles)
+    agiles. En fait, le noyau serait intenable si il essayait de maintenir une API stable.
   \item  Lors  qu'un développeur  modifie  une  API,  il doit  patcher
     l'ensemble des driver utilisant l'ancienne API.
   \item  On préfère  souvent  laisser l'ancienne  et  la nouvelle  API
-    cohabiter en demandant au mainteners de migrer vers la nouvelle
+    cohabiter en demandant au maintainers de migrer vers la nouvelle
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{L'API non-stable}
   \begin{itemize} 
   \item Il n'y  a pas de raisons de maintenir  un driver à l'extérieur
-    du noyau, sauf les problèmes de licence
-  \item  Il peut être  couteux en  temps d'intégré  un module  dans le
-    mainsteam. Les  mainteneurs vous demanderons  surement de corriger
+    du noyau, sauf les problèmes de licences
+  \item  Il peut être  coûteux en  temps d'intégrer  un module  dans le
+    mainstream. Les  mainteneurs vous demanderons  sûrement de corriger
     beaucoup de chose.
   \item Il faut  compter 2 à 4 fois le  temps de développement initial
     pour intégrer un module dans le mainstream
   \item Une fois que votre module  est intégré dans le mainstream et a
     passé  la phase  de  staging, il  sera  théoriquement maintenu  et
     supporté pour toujours.
+    \item Paradoxalement, l'API non-stable permet que la durée de maintenance d'un driver dans le noyau sera longue (en théorie infinie)
   \item Référence \c{Documentation/stable_api_nonsense.txt}
   \end{itemize} 
 \end{frame} 
+
+\section{Gestion des erreurs}
 
 \begin{frame}[fragile=singleslide]{Gestion des erreurs}
   \begin{itemize} 
@@ -438,25 +525,23 @@ host$ scripts/Lindent my_module.c
   \item  Les  fonctions  renvoyant des  pointeurs  peuvent
     retourner NULL ou des valeurs spéciale en cas d'erreur
   \item Utiliser les macro \c{PTR_ERR}, \c{ERR_PTR} et \c{IS_ERR}
-  \item Le segfault n'existe pas  dans le noyau.  Par conséquent, vous
-    n'avez pas de garde fou (bon, il  y a bien les Oops, mais ca n'est
-    pas garanti)
+  \item Rappel: le segfault n'existe pas  dans le noyau.
   \item Référence \file{linux/err.h}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Gestion des erreurs}
   \begin{itemize} 
-  \item Vous devez systèmatiquement gérer les erreur retourner par les
+  \item Vous devez systématiquement gérer les erreur retourner par les
     sous-fonctions  même  si  il  vous semble  impossible  qu'elle  se
     produise.
   \item Certaines pannes  matérielles peuvent amener des comportements
-    qui paraissent  impossibles. Facilité le  travaille des débuggueur
+    qui paraissent  impossibles. Facilité le  travaille des debugueurs
     en détectant ce type d'erreur le plus tôt possible
   \item Lorsque vous gérez  une erreur, vous devez \emph{défaire} tout
     ce qui à déjà été fait
-  \item Une manière commnue  de gérer les erreur d'initialisation dans
-    le noyau est d'utiliser \c{goto}:
+  \item Une manière connue  de gérer les erreur d'initialisation dans
+    le noyau est d'utiliser \c{goto}
   \end{itemize}
 \end{frame}
 
@@ -481,8 +566,9 @@ err_alloc:
     \end{lstlisting} 
 \end{frame} 
 
-\section{Notre premier device}
+\section{Communiquer avec le noyau}
 
+\subsection{Les appels systèmes}
 
 % Parler de l'historique
 %   /dev en statique
@@ -504,20 +590,22 @@ err_alloc:
   \item Le  premier paramètre correspond au numéro  de l'appel système
     (cf.  \emph{syscalls(2)}, \c{asm/unistd.h}).
   \item Il y a environ 300  appels systèmes dans le noyau. Il est rare
-    d'ajouter de nouveau appels système et exeptionnel d'en modifer ou
+    d'ajouter de nouveau appels système et exceptionnel d'en modifier ou
     d'en supprimer.
   \item  Le  modèle Unix  consiste  à  limiter  le nombre  des  appels
     systèmes et de tout gérer par l'intermédiaire de fichiers.
-  \item  Parmis  les  appels  systèmes  associés  aux  fichiers,  nous
+  \item  Parmi  les  appels  systèmes  associés  aux  fichiers,  nous
     trouvons \c{open}, \c{read},  \c{write}, \c{mmap}, \c{ioctl} (pour
     modifier la configuration du périphérique), etc...
   \end{itemize}
 \end{frame}
 
+\subsection{Les fichiers devices}
+
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
   \begin{itemize} 
-  \item Il  existe dans la  norme Unix des fichier  spéciaux, appellés
-    \emph{fichier devices}, dont les appels systèmes ne sont pas mappé
+  \item Il  existe dans la  norme Unix des fichier  spéciaux, appelés
+    \emph{fichiers devices}, dont les appels systèmes ne sont pas mappés
     sur des fichiers réels mais sur des fonctions du noyau.
   \item Un fichier  device est associé à deux  nombre, le \emph{major}
     et le \emph{minor}.
@@ -539,7 +627,7 @@ target% echo foo > my_device
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
   \begin{itemize} 
   \item Coté noyau, un driver  peut allouer une(des) entrée(s) dans la
-    table  des  device et  associé  des  fonctions  au appels  système
+    table  des  devices et  associer  des  fonctions  au appels  système
     associé     à    cette    entrée     (cf.     \c{register_chrdev},
     \c{struct file_operations} dans \c{linux/fs.h})
   \item  En standard, tous  les fichiers  devices sont  regroupés dans
@@ -548,10 +636,10 @@ target% echo foo > my_device
     \file{Documentation/devices.txt})  et les fichiers  de \file{/dev}
     était créés statiquement
   \item Avec  l'augmentation du  nombre de périphériques  existants et
-    l'arrivé des bus  hotplugs tels que l'USB, ce  modèle n'était plus
+    l'arrivée des bus  hotplugs tels que l'USB, ce  modèle n'était plus
     tenable.  Il existe  donc  des système  d'allocation dynamique  de
     numéro     de      devices     (cf.     \file{/proc/device}     et
-    \c{/sys/dev/\{char,block\}})     et    des     systèmes    créeant
+    \c{/sys/dev/\{char,block\}})     et    des     systèmes    créant
     automatiquement  les fichiers  nécessaires  (hotplug, udev,  mdev,
     devtmpfs, etc...)
   \end{itemize}
@@ -578,16 +666,17 @@ target% echo foo > my_device
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Mémoire userspace}
-  Les fonction de la \c{struct file_operations} recoivent en paramètre
-  des  addresses  provenant   de  l'espace  d'addressge  du  processus
-  appellant. En  raison de la  séparation des espaces mémoire  (nous y
-  reviondrons lorsque  nous parlerons plus en  détail du fonctionnment
-  de la MMU), c'est addresses  ne peuvent pas être utiliée directement
+  Les fonction de la \c{struct file_operations} reçoivent en paramètre
+  des  adresses  provenant   de  l'espace  d'adressage  du  processus
+  appelant. En  raison de la  séparation des espaces mémoire  (nous y
+  reviendrons lorsque  nous parlerons plus en  détail du fonctionnement
+  de la MMU), ces adresses  ne peuvent pas être utilisée directement
   dans  le  noyau. Il  est  est  nécessaire  d'utiliser les  fonctions
-  \verb+copy_from_user+ et \verb+copy_to_user+ pour y accèder.
+  \verb+copy_from_user+ et \verb+copy_to_user+ pour y accéder.
 \end{frame}
   
 %%%%%%%%% 
+\subsection{Read et write}
 
 \begin{frame}[fragile=singleslide]{Communiquer avec le noyau}{char\_dev}
   Nous allons faire un driver permettant de faire un pipe avec un buffer:
@@ -598,7 +687,7 @@ target% cat my_chardev
 toto
   \end{lstlisting}
 %% TODO: Présenter les différentes fonction ci-dessous
-\note{Motrer le code, décrire le contenu}
+\note{Montrer le code, décrire le contenu}
   Nous utiliserons:
   \begin{itemize}
   \item \verb+copy_to_user+, \verb+copy_from_user+
@@ -620,42 +709,32 @@ target$ cat my_chrdev
 target% rmmod my_chrdev
     \end{lstlisting} % $
 \end{frame}
- 
-%%% Ajouter ici une demo avec le sioctl. Un ioctl qui renvoye le nombre de byte restant à lire dans le buffer.
 
-% \begin{frame}{Les ioctls}
-%   C'est un appel système qui permet de faire passer une structure
-%   quelconque à un device.\\
-%   Pour appeller un ioctl, il faut un device, le numéro de l'IOCTL et
-%   l'arguments.\\
-%   Les  numéro d'IOCTL  se  décode ainsi  (attention,  ca n'est  qu'une
-%   norme, et elle a ses exeception, principalement powerpc):
-% %   \begin{lstlisting}
-% %  bits    meaning
-% %  31-30  00 - no parameters: uses _IO macro
-% %         10 - read: _IOR
-% %         01 - write: _IOW
-% %         11 - read/write: _IOWR
-% % 
-% %  29-16  size of arguments
-% % 
-% %  15-8   ascii character supposedly
-% %         unique to each driver
-% % 
-% %  7-0    function #
-% % 
-% % 
-% % So for example 0x82187201 is a read with arg length of 0x218,
-% % character 'r' function 1. Grepping the source reveals this is:
-% % Les ioctl doivent être unique par device. Mais on préfère qu'il soit unique
-% % sur tout le système.
-% % 
-% % Les macro _IOR, _IOW, _IORW et _IO nous aident:
-% % #define CHANGE_BUF_SZ _IOR(42, 1, int)
-% %    \end{lstlisting}
+\subsection{Les ioctls}
 
-% Aller plus loin: \file{device.h}: Implémentation d'un device complet.
-% \end{frame}
+\begin{frame}[fragile=singleslide]{Les ioctl}
+  Les  appels  systèmes  read   et  write  permettent  de  communiquer
+  correctement  avec les  périphériques. Néanmoins,  les périphériques
+  possèdent très souvent des options de paramétrages. On utilise alors
+  l'appel système \c{ioctl}.
+  \begin{itemize} 
+  \item  Celui-ci prend  en paramètre  un numéro  d'identifiant  et un
+    nombre variable d'arguments:
+    \begin{lstlisting} 
+ret = ioctl(fd, FIFO_GET_LEN, &arg);
+    \end{lstlisting} 
+  \item  Il est  existe une  normalisation  pour le  format du  numéro
+    d'ioctl (\c{FIFO_GET_LEN}).  Les macro \c{_IO}, \c{_IOR}, \c{_IOW}
+    et \c{_IOWR} permettent de générer des numéro d'ioctl corrects:
+    \begin{lstlisting} 
+#define FIFO_GET_LEN _IOR('f', 0x01, int)
+    \end{lstlisting} 
+  \item On Référence: \file{Documentation/ioctl/ioctl-decoding.txt}
+  \item     Les      ioctl     existants     sont      listés     dans
+    \file{Documentation/ioctl/ioctl-number.txt}
+  \end{itemize}
+\end{frame} 
+
 
 
   % Programmer
