@@ -1,7 +1,0 @@
-\documentclass[compress]{beamer}
-\input{style}
-\begin{document}
-\begin{frame}{Title}
-<>
-\end{frame}
-\end{document}
