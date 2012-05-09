@@ -669,18 +669,22 @@ host$ objcopy -O srec vmlinux vmlinux.srec
 \begin{frame}[fragile=singleslide]{Configuration globale}
   \emph{General setup}:
   \begin{itemize} 
-  \item  \c{EXPERIMENTAL}: Débloque les  options de  compilation pour
-    les drivers/option instables (staging, etc...)
-  \item \c{CROSS_COMPILE}: Affecte la variable \c{CROSS_COMPILE}
-  \item    \c{LOCALVERSION}:    Ajoute    un    identifiant    à    la
+  \item \emph{Prompt for  development and/or incomplete code/drivers}:
+    Débloque  les  options  de  compilation  pour  les  drivers/option
+    instables (staging, etc...)
+  \item  \emph{Cross-compiler  tool  prefix}  :  Affecte  la  variable
+    \c{CROSS_COMPILE}
+  \item   \emph{Local  version}   :   Ajoute  un   identifiant  à   la
     version. Indispensable  dans les phases  d'intégration. La version
     peut être lue dans  \file{/proc/version}. Il est aussi possible de
     faire \c{make kernelrelease} dans  un répertoire de compilation du
     noyau.
-  \item   \c{LOCALVERSION_AUTO}:  Ajoute   l'identifiant   git  à   la
-    version. Indispensable dans les phases de développement
-  \item  \c{KERNEL_GZIP}: Permet  de choisir  le type  de compression.
-    Chaque   algorithme   a  ces   inconvénients   et  ses   intérêts.
+  \item  \emph{Automatically  append  version  information}  :  Ajoute
+    l'identifiant git  à la version. Indispensable dans  les phases de
+    développement
+  \item \emph{Kernel  compression mode}: Permet de choisir  le type de
+    compression.   Chaque  algorithme   a  ces  inconvénients  et  ses
+    intérêts.
     \note[item]{cf. \url{http://free-electrons.com/blog/lzo-kernel-compression}}
   \item \c{SWAP}: Permet de gérer un espace d'échange dur un disque
   \end{itemize}
@@ -779,14 +783,16 @@ host$ objcopy -O srec vmlinux vmlinux.srec
 \begin{frame}[fragile=singleslide]{Configuration du boot et du FPE}
   \emph{Boot options}:
   \begin{itemize}
-  \item \c{USE_OF}: Utilise  \emph{OpenFirmware}, le nouveau format de
-    description matériel appelé aussi \emph{Flatten Device Tree}
-  \item  \c{CMDLINE}: Permet de  passer des  paramètres par  défaut au
-    noyau (nous verrons cela un peu plus loin)
-  \item \c{ZBOOT_*}:  Permettent de démarrer  le noyau à  partir d'une
-    ROM, d'une MMC, etc...
-  \item  \c{XIP_KERNEL}: Permet  d'exécuter un  noyau non  compressé à
-    partir d'une ROM
+  \item \emph{Flattened Device  Tree} : Utilise \emph{OpenFirmware}, le
+    nouveau format de  description matériel appelé aussi \emph{Flatten
+      Device Tree}
+  \item  \emph{Default kernel  command string}:  Permet de  passer des
+    paramètres  par défaut  au noyau  (nous verrons  cela un  peu plus
+    loin)
+  \item \emph{boot loader address}:  Permettent de démarrer le noyau à
+    partir d'une ROM, d'une MMC, etc...
+  \item \emph{Kernel Execute-In-Place  from ROM}: Permet d'exécuter un
+    noyau non compressé à partir d'une ROM
   \end{itemize}
   \emph{Floating point emulation}: Si  une instruction sur des nombres
   à virgule flottante est rencontrée  et ne peut pas être exécutée, le
@@ -800,14 +806,16 @@ host$ objcopy -O srec vmlinux vmlinux.srec
   \begin{itemize}
   \item Possibilité  d'activer les innombrables  protocoles réseaux de
     niveaux 1, 2 et 3
-  \item  \emph{Network options}: Beaucoup  de fonctionnalité  réseau :
+  \item  \emph{Network options} : Beaucoup  de fonctionnalité  réseau :
     client dhcp,  bootp, rarp, ipv6, ipsec, les  protocole de routage,
     gestion de QoS, support des VLAN, du multicast,
-  \item \c{UNIX}: Les sockets \emph{UNIX} (cf. sortie de \c{netstat})
-  \item \c{INET}: Les sockets bien connue \emph{TCP/IP}
-  \item \c{NETFILTER}:  Le firewall de  Linux.  D'innombrable options.
-    Permet  l'utilisation  d'iptables  si  l'option  \c{IPTABLES}  est
-    active.
+  \item   \emph{Unix  domain  sockets}   :  Les   sockets  \emph{UNIX}
+    (cf. sortie de \c{netstat})
+  \item   \emph{TCP/IP   networking}  :   Les   sockets  bien   connue
+    \emph{TCP/IP}
+  \item  \emph{Netfilter}  :  Le  firewall  de  Linux.   D'innombrable
+    options.  Permet l'utilisation d'iptables si l'option \c{IPTABLES}
+    est active.
   \end{itemize} 
 \end{frame}
 
@@ -816,9 +824,9 @@ host$ objcopy -O srec vmlinux vmlinux.srec
 \begin{frame}[fragile=singleslide]{Configuration des systèmes de fichiers}
   \emph{File systems}:
   \begin{itemize}
-  \item  \c{EXT2_FS},   \c{EXT3_FS},  \c{EXT4_FS}: Le   file  system
-    standard de Linux
-  \item \c{FUSE_FS}: Permet de  développer des systèmes de fichiers en
+  \item   \emph{Second   extended},   \emph{Ext3  journalling   file},
+    \emph{The Extended 4 filesystem}: Le file system standard de Linux
+  \item \emph{FUSE}: Permet de  développer des systèmes de fichiers en
     espace utilisateur
   \item \emph{Pseudo  filesystems} Systèmes de  fichiers sans supports
     physiques
@@ -841,19 +849,22 @@ host$ objcopy -O srec vmlinux vmlinux.srec
   \item  \emph{Miscellaneous  filesystems}  Contient des  systèmes  de
     fichiers spécifiques
     \begin{itemize} 
-    \item \c{ECRYPT_FS}: Gestion transparent d'un file system codé
-    \item  \c{JFFS2_FS}: Spécialisé  pour  les Flash  avec gestion  de
-      l'écriture  uniforme, des \emph{bad  blocks} et  des \emph{erase
-        blocks}.
-    \item \c{CRAMFS}: Spécialisé pour ROM sans accès en écriture. 
-    \item  \c{SQUASHFS}: Idem \c{CRAMFS} mais fortement compressé
+    \item  \emph{eCrypt filesystem layer}  : Gestion  transparent d'un
+      file system codé
+    \item \emph{Journalling  Flash File  System v2} :  Spécialisé pour
+      les  Flash avec  gestion de  l'écriture uniforme,  des \emph{bad
+        blocks} et des \emph{erase blocks}.
+    \item \emph{Compressed ROM file  system}: Spécialisé pour ROM sans
+      accès en écriture.
+    \item  \emph{Squashed   file  system}:  Idem   \emph{cramfs}  mais
+      fortement compressé
     \end{itemize} 
   \item \emph{Network File Systems}
     \begin{itemize}
-    \item \c{NFS_FS}:  File system  sur ethernet.  Très  utilisé dans
-      l'embarqué durant les phases de développement
-    \item \c{ROOT_NFS}: Permet de démarrer le noyau sur une partition
-      NFS
+    \item \emph{NFS client support}  : File system sur ethernet.  Très
+      utilisé dans l'embarqué durant les phases de développement
+    \item \emph{Root file system on  NFS}: Permet de démarrer le noyau
+      sur une partition NFS
     \end{itemize} 
   \end{itemize} 
 \end{frame}
@@ -863,16 +874,16 @@ host$ objcopy -O srec vmlinux vmlinux.srec
 \begin{frame}[fragile=singleslide]{Configuration des Drivers}
   \emph{Device Drivers} Des centaines de drivers. Notons:
   \begin{itemize}
-  \item   \c{UEVENT_HELPER_PATH}:  Le  programme   apellé  lorsqu'un
+  \item   \emph{path to uevent helper}:  Le  programme   apellé  lorsqu'un
     nouveau            périphérique            est           détecté
     (cf.              \c{/proc/sys/kernel/hotplug}             et
     \c{/sys/kernel/uevent_helper})
-  \item   \c{DEVTMPFS}:   Un  tmpfs   spécifique   pour  les   devices
-    automatiquement monté sur  \file{/dev}.  Les fichiers devices sont
-    alors   automatiquement   créés   sans   l'aide   d'un   programme
-    extérieur.
-  \item \c{MTD}: Les flashs
-  \item \c{STAGING}: Des drivers en cours de bêta
+  \item  \emph{Maintain a devtmpfs  filesystem to  mount at  /dev}: Un
+    tmpfs  spécifique  pour  les  devices  automatiquement  monté  sur
+    \file{/dev}.   Les  fichiers  devices sont  alors  automatiquement
+    créés sans l'aide d'un programme extérieur.
+  \item \emph{Memory Technology Device}: Les flashs
+  \item \emph{Staging drivers}: Des drivers en cours de bêta
   \end{itemize} 
 \end{frame}
 

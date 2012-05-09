@@ -51,7 +51,6 @@ static long m_ioctl(struct file *file, unsigned int nr, unsigned long arg) {
 	return -EINVAL;
 }
 
-
 static struct file_operations m_fops = {
   .owner          = THIS_MODULE,
   .read           = m_read,

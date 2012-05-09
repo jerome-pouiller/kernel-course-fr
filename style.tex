@@ -6,33 +6,43 @@
 %
 % Copyright 2010 Jérôme Pouiller <jezz@sysmic.org>
 %
-%\documentclass[french,a4paper,10pt]{beamer}
+
 % Configurationde de Beamer
+
 \usetheme{Warsaw}
-\usecolortheme[RGB={238,127,0}]{structure}
-% \usecolortheme[RGB={181,0,0}]{structure}
+
+% Quiris
+%\usecolortheme[RGB={238,127,0}]{structure}
+% Apollo
+%\usecolortheme[RGB={0,56,126}]{structure}
+% Sysmic
+\usecolortheme[RGB={181,0,0}]{structure}
+
 % Headers et footers
 \useoutertheme[subsection=false]{smoothbars}
 % Rectangle dans les itemize
 \useinnertheme{rectangles}
 % Pas de symboles pour la navigation
 \setbeamertemplate{navigation symbols}{}
+
+% Logo en filigranne
 %\setbeamertemplate{background canvas}{%
 %  \tikz {%
 %    \node at (0,0) {};
-%    \node[inner sep=0pt, opacity=0.2] at (0.5\paperwidth,-0.5\paperheight) {\includegraphics[height=27.2mm,width=65.1mm]{logo}};
+%   \node[inner sep=0pt, opacity=0.2] at (0.5\paperwidth,-0.5\paperheight) {\includegraphics[height=27.2mm,width=65.1mm]{pics/logo}};
 %  }
 %}
+
 % Ajout des numéros de pages
 \newcommand*\oldinsertshortitle{}%
 \let\oldinsertshorttitle\insertshorttitle%
 \renewcommand*\insertshorttitle{\oldinsertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber}
 
-\usepackage{ucs}                      % La sortie est en UTF8
-\usepackage[utf8x]{inputenc}          % L'entrée aussi
+\usepackage{ucs}              % La sortie est en UTF8
+\usepackage[utf8x]{inputenc}  % L'entrée aussi
 \usepackage[T1]{fontenc}      % Pour la césure des mots accentués
 \usepackage{lmodern}          % Pour les lettres francaises
-\usepackage[french]{babel}            % Pour la sortie francaise
+\usepackage[french]{babel}    % Pour la sortie francaise
 \usepackage{times}
 \usepackage{mathptmx}         % Font (don't forget to install latex-font-recommended)
 
@@ -54,6 +64,8 @@
 \newcommand{\file}[1]{\texttt{#1}}
 \newcommand{\cmd}[1]{\texttt{#1}}
 \renewcommand\c[1]{\lstinline[language=c]{#1}}
+
+\usepackage[newcommand]{ragged2e}
 
 % \usepackage[]{version} 
 % \usepackage{ntheorem} 
