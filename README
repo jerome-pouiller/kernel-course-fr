@@ -1,0 +1,23 @@
+EMBEDED LINUX TRAINING
+======================
+Jérôme Pouiller <jezz@sysmic.org>
+
+This directory contains training material about Linux kernel. This
+course is written in French.
+
+This training is the next part of another training called "Embeded Linux
+Training" that you can find on my site.
+
+Even it is not mandatory, I suggest to purchase a board referenced as USB-A9263 
+to Calao (I may also supply some board if you mail me). You will also need BSP
+for this board. This one is also available on my site: http://sysmic.org/BSP
+
+How to compile
+--------------
+
+These are written in LaTeX with beamer. If you have correctly installed your
+LaTeX distribution, a simple "pdflatex main.tex" should be sifficient to
+compile pdf version of this course. You can also found an already compiled
+version on http://sysmic.org/kernel
+
+
