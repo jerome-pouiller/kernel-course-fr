@@ -23,7 +23,7 @@
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
   Un template de module:
-  \lstinputlisting[language=c,firstline=16]{modules/my_module1.c}
+  \lstinputlisting[language=c,firstline=16]{samples/mod0_min/mod0_min.c}
 \end{frame}
 
 \begin{frame}[fragile=singleslide]{Quelques macros de base}
@@ -130,7 +130,7 @@ MODULE_LICENSE
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Les modules noyau}{my\_module}
-  \lstinputlisting[language=c,lastline=14]{modules/my_module1.c}
+  \lstinputlisting[language=c,lastline=14]{samples/mod0_min/mod0_min.c}
 \end{frame}
 
 \section{Ecriture des Makefile}
@@ -184,7 +184,7 @@ obj-$(MY_COMPILE_OPTION) := my_module.o
   \item y: compilé en statique
   \end{itemize}
   Fichier \file{Kconfig}:
-  \lstinputlisting[langage=]{samples/mod1_tmpl/Kconfig}
+  \lstinputlisting[langage=]{samples/mod0_min/Kconfig}
 \end{frame} 
 
 \begin{frame}[fragile=singleslide]{Utilisation de Kconfig}

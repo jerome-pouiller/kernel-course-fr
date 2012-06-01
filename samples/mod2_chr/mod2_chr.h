@@ -9,7 +9,7 @@
 
 #include <linux/ioctl.h>
 
-#define FIFO_GET_LEN _IOR('f', 0x00000001, int)
+#define FIFO_GET_LEN _IOR('f', 0x01, int)
 
 #endif /* MOD2_CHR_H */
 

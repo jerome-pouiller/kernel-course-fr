@@ -8,48 +8,51 @@
 %
 
 % Pour faire une version imprimable, avec les notes sans overlay
-% \PassOptionsToClass{notes=show,handout}
-% Pour en faire un article
-% \documentclass[a4paper]{article}
+% \PassOptionsToClass{notes=show,handout}{beamer}
+% Pour en faire un article:
+% \documentclass[10pt,ucs,usepdftitle=false,a4paper]{article}
+% \usepackage{beamerarticle}
 
 \documentclass[10pt,ucs,usepdftitle=false]{beamer}
-%\usepackage{beamerarticle}
 
 % Pour mettre deux pages sur une
-% Préférer l'utilisation d'un post processing
+% (Préférer l'utilisation d'un post processing)
 %\usepackage{pgfpages}
 %\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
 %\pgfpagesuselayout{4 on 1}[a4paper,landscape, border shrink=5mm]
 %\setbeameroption{show notes on second screen=right}
 
 \input{style}
-                        
+
 % Apparait sur chaque slide:
 %\logo{\pgfimage[height=5mm]{pics/logo}}
- 
+
 \title{Formation au Noyau Linux}
 \hypersetup{pdftitle={Formation au Noyau Linux}}
 % \subtitle{Sous-titre}
 \author[J. Pouiller]{Jérôme Pouiller \email{j.pouiller@sysmic.org}}
 \hypersetup{pdfauthor={Jérôme Pouiller}}
-\institute[Sysmic]{\hspace*{1cm}\pgfimage[height=1.5cm]{pics/logo}}
+\institute[Sysmic]{Sysmic}
+%\institute[Sysmic]{\hspace*{1cm}\pgfimage[height=1.5cm]{pics/logo}}
 % Plus complet:
 % \institute[Sysmic]{
-%   \inst{1} \hspace*{1cm}\includegraphics[height=1.5cm]{logo}
+%   \inst{1} \hspace*{1cm}\includegraphics[height=1.5cm]{pics/logo}
 %   \and
-%   \inst{2} \includegraphics[height=1.5cm]{logo-apollo}
+%   \inst{2} \includegraphics[height=1.5cm]{pics/logo-quiris}
 % }
-\date[Avr. 2012]{10-12 Avril 2012}
+%\date[Juin 2012]{10-12 Juin 2012}
 % Pour le PDF seulement:
 \subject{Noyau Linux}
 \keywords{Linux, OS, sysmic, noyau, kernel}
   
 \begin{document}
- 
+  
   \begin{frame}[plain]
     \maketitle
+    \note[item]{Parler de moi, de mon CV, freelance, sysmic, expertise, Polytech Paris, Tours, Insa Rennes}
+    \note[item]{Essaye de travailler sans les slides lorsqu'il y a des commandes}
+    \note[item]{Faire un tour de table (autour du café)}
   \end{frame}
-  \note{Parler de moi, de mon CV, boulot, freelance, sysmic, expertise, Polytech Paris}
 
   \begin{frame}{Sommaire}
     \begin{itemize} 
