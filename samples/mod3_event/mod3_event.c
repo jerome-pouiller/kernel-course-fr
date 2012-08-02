@@ -9,6 +9,7 @@
 #include <linux/wait.h>
 #include <linux/sched.h>
 #include <asm/uaccess.h>
+#include <linux/poll.h>
 
 static int major = 0;
 
@@ -34,16 +35,26 @@ static ssize_t m_write(struct file *file, const char *user_buf, size_t count, lo
 }
 
 
+static unsigned int m_poll(struct file *filp, poll_table *wait) {
+	int mask = POLLOUT | POLLWRNORM;
+	poll_wait(filp, &my_queue, wait);
+	if (!kfifo_is_empty(&my_fifo))
+		mask |= POLLIN | POLLRDNORM;
+	// pr_info("Poll returning : %d\n", mask);
+	return mask;
+}
+
 static struct file_operations m_fops = {
 	.owner   = THIS_MODULE,
 	.read    = m_read,
 	.write   = m_write,
+	.poll    = m_poll,
 };
 
 static int __init m_init(void) {
 	// Process acces to driver as soon as it is registered, so it last
 	major = register_chrdev(major, "m_chrdev", &m_fops);
-	if (major < 0) {
+	if (major <= 0) {
 		return major;
 	}
 
