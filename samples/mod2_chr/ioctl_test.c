@@ -13,7 +13,7 @@
 
 
 int main(int argc, char **argv) {
-	int ret, arg;
+	int ret, arg = 42;
 	int fd = open(argv[1], O_RDONLY);
 	ret = ioctl(fd, FIFO_GET_LEN, &arg);
 	printf("Returned %m with argument %d\n", -ret, arg);

@@ -43,9 +43,10 @@ static ssize_t m_write(struct file *file, const char *user_buf, size_t count, lo
 }
 
 static long m_ioctl(struct file *file, unsigned int nr, unsigned long arg) {
-	pr_debug("Received ioctl 0x%08x\n", nr);
+	pr_info("Received ioctl 0x%08x %d %d\n", nr, idx, *(int *) arg);
 	if (nr == FIFO_GET_LEN) {
 		int ret = copy_to_user((void *) arg, &idx, sizeof(idx));
+		pr_info("Received ioctl 0x%08x %d %d\n", nr, idx, *(int *) arg);
 		return ret;
 	}
 	return -EINVAL;
