@@ -7,7 +7,7 @@
 % Copyright 2010 Jérôme Pouiller <jezz@sysmic.org>
 %
 
-% Configurationde de Beamer
+% Configuration de Beamer
 
 \usetheme{Warsaw}
 
@@ -29,7 +29,7 @@
 \setbeamertemplate{background canvas}{
   \tikz {
     \node at (0,0) {};
-    \node[inner sep=0pt, opacity=0.2] at (0.5\paperwidth,-0.8\paperheight) {\includegraphics[height=23.4mm,width=128mm]{pics/logo}};
+    \node[inner sep=0pt, opacity=0.2] at (0.5\paperwidth,-0.8\paperheight) {\includegraphics[height=23.4mm,width=128mm]{pics/filigranne-sysmic}};
   }
 }
 
@@ -54,16 +54,21 @@
   \newcommand{\embedfile}[1]{}
 \fi
 
-\usepackage[sections,displaymath]{preview}
-\PreviewEnvironment{tikzpicture}
-\PreviewEnvironment{center}
-\PreviewEnvironment{frame}
+% Produce errors like:
+% main.tex:54: Undefined control sequence.
+% \@EveryShipout@Output ...EveryShipout@Org@Shipout
+%                                                   \box \@cclv
+%\usepackage[sections,displaymath]{preview}
+%\PreviewEnvironment{tikzpicture}
+%\PreviewEnvironment{center}
+%\PreviewEnvironment{frame}
 
 \usepackage{hyperref} % Doit être chargé avant ntheorem
 \newcommand{\email}[1]{\href{mailto:#1}{\nolinkurl{<#1>}}}
-\newcommand{\file}[1]{\texttt{#1}}
-\newcommand{\cmd}[1]{\texttt{#1}}
-\renewcommand\c[1]{\lstinline[language=c]{#1}}
+\newcommand{\man}[1]{\emph{#1}}
+\newcommand{\file}[1]{\lstinline[backgroundcolor=\color{{rgb}{1,1,0.8}},language=]{#1}}
+\newcommand{\cmd}[1]{\lstinline[backgroundcolor=\color{{rgb}{1,1,0.8}},language=]{#1}}
+\renewcommand{\c}[1]{\lstinline[backgroundcolor=\color{{rgb}{1,1,0.8}},language=c]{#1}}
 
 \usepackage[newcommand]{ragged2e}
 
