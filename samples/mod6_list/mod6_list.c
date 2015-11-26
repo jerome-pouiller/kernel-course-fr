@@ -17,7 +17,7 @@ static int __init m_init(void)
 	char c;
 
 	for (c = 'a'; c != 'f'; c++) {
-		new_node = kmalloc(sizeof(new_node), GFP_KERNEL);
+		new_node = kmalloc(sizeof(struct my_node), GFP_KERNEL);
 		new_node->content = c;
 		list_add(&new_node->node, &my_list);
 	}
