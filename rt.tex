@@ -436,7 +436,7 @@ host$ arm-linux-gcc -Wall $(../xenomai-2.5.5/install/bin/xeno-config --skin nati
   \note[item]{TODO: Leur faire faire un programme pour Xenomai}
 Compiler un module noyau Xenomai:
 \begin{lstlisting}
-make ARCH=arm CROSS_COMPILE=arm-linux- -C ../linux-2.6.33.7-ipipe/build EXTRA_CFLAGS="-I/home/jerome/cours/embeded_linux/linux-2.6.33.7-ipipe/build/include/xenomai" SUBDIRS=$(pwd) modules
+make ARCH=arm CROSS_COMPILE=arm-linux- -C ../linux-2.6.33.7-ipipe/build EXTRA_CFLAGS="-I$(pwd)/../linux-2.6.33.7-ipipe/build/include/xenomai" SUBDIRS=$(pwd) modules
 \end{lstlisting} %$
 % Documentation ici:
 %\url{http://www.xenomai.org/documentation/xenomai-head/html/api/}
